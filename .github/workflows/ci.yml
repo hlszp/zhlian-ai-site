@@ -19,6 +19,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: Test deployment scripts
+        run: bash tests/deploy-scripts.sh
       - name: Package release
         run: bash scripts/package.sh
       - uses: actions/upload-artifact@v4

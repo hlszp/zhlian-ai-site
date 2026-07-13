@@ -1,0 +1,270 @@
+name: Deploy production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test deployment scripts
+        run: bash tests/deploy-scripts.sh
+
+      - name: Build and package
+        id: package
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/package.sh
+          mapfile -t archives < <(find . -maxdepth 1 -type f -name 'process-industry-ai-*.tar.gz' -print)
+          [[ ${#archives[@]} -eq 1 ]] || { echo "Expected exactly one release archive" >&2; exit 1; }
+          archive="${archives[0]#./}"
+          [[ -f "$archive.sha256" ]] || { echo "Missing checksum for $archive" >&2; exit 1; }
+          sha256sum -c "$archive.sha256"
+          echo "archive=$archive" >> "$GITHUB_OUTPUT"
+
+      - name: Upload verified release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-release
+          path: |
+            ${{ steps.package.outputs.archive }}
+            ${{ steps.package.outputs.archive }}.sha256
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      PROD_HOST: ${{ vars.PROD_HOST }}
+      PROD_PORT: ${{ vars.PROD_PORT }}
+      PROD_USER: ${{ vars.PROD_USER }}
+      PROD_URL: ${{ vars.PROD_URL }}
+      PROD_UPLOAD_DIR: ${{ vars.PROD_UPLOAD_DIR }}
+    steps:
+      - name: Download verified release artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: production-release
+          path: release-artifact
+
+      - name: Validate deployment configuration and artifact
+        id: metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in PROD_HOST PROD_PORT PROD_USER PROD_URL PROD_UPLOAD_DIR; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "Missing production environment value: $name" >&2
+              exit 1
+            fi
+          done
+          [[ "$PROD_PORT" =~ ^[1-9][0-9]{0,4}$ ]] || { echo "Invalid PROD_PORT" >&2; exit 1; }
+          (( PROD_PORT <= 65535 )) || { echo "Invalid PROD_PORT" >&2; exit 1; }
+          [[ "$PROD_USER" =~ ^[a-z_][a-z0-9_-]*$ ]] || { echo "Invalid PROD_USER" >&2; exit 1; }
+          [[ "$PROD_HOST" =~ ^[A-Za-z0-9.-]+$ ]] || { echo "Invalid PROD_HOST" >&2; exit 1; }
+          [[ "$PROD_URL" =~ ^https?://[^[:space:]]+$ ]] || { echo "Invalid PROD_URL" >&2; exit 1; }
+          [[ "$PROD_UPLOAD_DIR" =~ ^/[A-Za-z0-9._/-]+$ ]] || { echo "Invalid PROD_UPLOAD_DIR" >&2; exit 1; }
+          [[ ! "$PROD_UPLOAD_DIR" =~ (^|/)\.\.(/|$) ]] || { echo "Invalid PROD_UPLOAD_DIR" >&2; exit 1; }
+          cd "$GITHUB_WORKSPACE/release-artifact"
+          mapfile -t archives < <(find . -maxdepth 1 -type f -name 'process-industry-ai-*.tar.gz' -print)
+          [[ ${#archives[@]} -eq 1 ]] || { echo "Expected exactly one downloaded release archive" >&2; exit 1; }
+          archive="${archives[0]#./}"
+          [[ "$archive" =~ ^process-industry-ai-[0-9]{8}-[0-9]{6}\.tar\.gz$ ]] || { echo "Invalid archive name" >&2; exit 1; }
+          [[ -f "$archive.sha256" ]] || { echo "Missing downloaded checksum" >&2; exit 1; }
+          sha256sum -c "$archive.sha256"
+          release_id="${GITHUB_SHA:0:12}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          remote_dir="${PROD_UPLOAD_DIR%/}/$release_id"
+          echo "archive=$archive" >> "$GITHUB_OUTPUT"
+          echo "package_root=${archive%.tar.gz}" >> "$GITHUB_OUTPUT"
+          echo "release_id=$release_id" >> "$GITHUB_OUTPUT"
+          echo "remote_dir=$remote_dir" >> "$GITHUB_OUTPUT"
+
+      - name: Configure SSH
+        id: ssh_config
+        shell: bash
+        env:
+          SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.PROD_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          for name in SSH_KEY SSH_KNOWN_HOSTS; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "Missing production secret: $name" >&2
+              exit 1
+            fi
+          done
+          install -d -m 0700 "$HOME/.ssh"
+          printf '%s\n' "$SSH_KEY" > "$HOME/.ssh/production_key"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 0600 "$HOME/.ssh/production_key" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/production_key" >/dev/null
+          ssh-keygen -F "[$PROD_HOST]:$PROD_PORT" -f "$HOME/.ssh/known_hosts" >/dev/null || {
+            echo "PROD_KNOWN_HOSTS does not contain [$PROD_HOST]:$PROD_PORT" >&2
+            exit 1
+          }
+
+      - name: Upload release
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh_options=(
+            -i "$HOME/.ssh/production_key"
+            -p "$PROD_PORT"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts"
+          )
+          remote_dir="${{ steps.metadata.outputs.remote_dir }}"
+          archive="$GITHUB_WORKSPACE/release-artifact/${{ steps.metadata.outputs.archive }}"
+          ssh "${ssh_options[@]}" "$PROD_USER@$PROD_HOST" "mkdir '$remote_dir' && chmod 0700 '$remote_dir'"
+          scp_options=(
+            -i "$HOME/.ssh/production_key"
+            -P "$PROD_PORT"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts"
+          )
+          scp "${scp_options[@]}" "$archive" "$archive.sha256" "$PROD_USER@$PROD_HOST:$remote_dir/"
+
+      - name: Verify and deploy release
+        id: remote_deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh_options=(
+            -i "$HOME/.ssh/production_key"
+            -p "$PROD_PORT"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts"
+          )
+          ssh "${ssh_options[@]}" "$PROD_USER@$PROD_HOST" bash -s -- \
+            "${{ steps.metadata.outputs.remote_dir }}" \
+            "${{ steps.metadata.outputs.archive }}" \
+            "${{ steps.metadata.outputs.package_root }}" \
+            "${{ steps.metadata.outputs.release_id }}" <<'REMOTE'
+          set -euo pipefail
+          remote_dir="$1"
+          archive="$2"
+          package_root="$3"
+          release_id="$4"
+          cd "$remote_dir"
+          sha256sum -c "$archive.sha256"
+          tar -tzf "$archive" > archive-contents.txt
+          if grep -Eq '(^/|(^|/)\.\.(/|$))' archive-contents.txt; then
+            echo "Unsafe path found in release archive" >&2
+            exit 1
+          fi
+          unexpected_paths="$(grep -Ev "^${package_root}(/|$)" archive-contents.txt || true)"
+          if [[ -n "$unexpected_paths" ]]; then
+            echo "Unexpected archive root" >&2
+            exit 1
+          fi
+          tar -xzf "$archive"
+          cd "$package_root"
+          DEPLOY_LOCK_MODE=flock bash server/deploy.sh \
+            --app-root /opt/zlinfot-ai \
+            --release-id "$release_id" \
+            --static-only
+          REMOTE
+
+      - name: Verify public HTTP
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="$(mktemp)"
+          trap 'rm -f "$body"' EXIT
+          status=""
+          for attempt in {1..10}; do
+            status="$(curl --silent --show-error --location --output "$body" --write-out '%{http_code}' \
+              --connect-timeout 3 --max-time 10 "$PROD_URL" || true)"
+            if [[ "$status" == "200" ]] && grep -Fq '流程工业 AI 与智能体' "$body"; then
+              break
+            fi
+            sleep 2
+          done
+          [[ "$status" == "200" ]] || { echo "Public home page returned ${status:-connection failure}" >&2; exit 1; }
+          grep -Fq '流程工业 AI 与智能体' "$body" || { echo "Public home page content check failed" >&2; exit 1; }
+          asset="$(grep -Eo '(src|href)="/[^"]+\.(js|css)"' "$body" | head -n 1 | sed -E 's/^[^=]+="([^"]+)"$/\1/' || true)"
+          [[ -n "$asset" ]] || { echo "Public home page has no local JS/CSS asset" >&2; exit 1; }
+          base="${PROD_URL%/}"
+          asset_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+            --connect-timeout 3 --max-time 10 "$base$asset" || true)"
+          [[ "$asset_status" == "200" ]] || { echo "Public asset returned ${asset_status:-connection failure}" >&2; exit 1; }
+
+      - name: Recover a failed release
+        if: failure() && steps.ssh_config.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh_options=(
+            -i "$HOME/.ssh/production_key"
+            -p "$PROD_PORT"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts"
+          )
+          ssh "${ssh_options[@]}" "$PROD_USER@$PROD_HOST" bash -s -- \
+            "${{ steps.metadata.outputs.remote_dir }}" \
+            "${{ steps.metadata.outputs.package_root }}" \
+            "${{ steps.metadata.outputs.release_id }}" <<'REMOTE'
+          set -euo pipefail
+          remote_dir="$1"
+          package_root="$2"
+          release_id="$3"
+          current_target="$(readlink /opt/zlinfot-ai/current 2>/dev/null || true)"
+          if [[ "$current_target" != "releases/$release_id" ]]; then
+            echo "Failed release is not current; no recovery switch is needed."
+            exit 0
+          fi
+          rollback_script="$remote_dir/$package_root/server/rollback.sh"
+          [[ -f "$rollback_script" ]] || { echo "Rollback script is unavailable" >&2; exit 1; }
+          DEPLOY_LOCK_MODE=flock bash "$rollback_script" --app-root /opt/zlinfot-ai --static-only
+          REMOTE
+
+      - name: Remove remote upload
+        if: always() && steps.ssh_config.outcome == 'success' && steps.metadata.outputs.remote_dir != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh_options=(
+            -i "$HOME/.ssh/production_key"
+            -p "$PROD_PORT"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts"
+          )
+          ssh "${ssh_options[@]}" "$PROD_USER@$PROD_HOST" \
+            "rm -rf '${{ steps.metadata.outputs.remote_dir }}'"
+
+      - name: Remove SSH material
+        if: always()
+        shell: bash
+        run: rm -f "$HOME/.ssh/production_key" "$HOME/.ssh/known_hosts"
