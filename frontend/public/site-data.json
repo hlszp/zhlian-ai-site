@@ -1,0 +1,1021 @@
+{
+  "meta": {
+    "generated_at": "2026-07-13T23:29:52Z",
+    "version": "1.0.0"
+  },
+  "categories": [
+    {
+      "slug": "control-loop-diagnosis",
+      "name": "控制回路诊断",
+      "description": "围绕 PID、振荡、粘滞、阀门定位等控制回路性能问题",
+      "order": 10
+    },
+    {
+      "slug": "process-monitoring",
+      "name": "过程监测",
+      "description": "实时工况、异常检测与多变量分析",
+      "order": 20
+    },
+    {
+      "slug": "batch-control",
+      "name": "批控制",
+      "description": "S88/S95 批次建模、批记录与合规",
+      "order": 30
+    },
+    {
+      "slug": "agentic-systems",
+      "name": "智能体系统",
+      "description": "RAG、MCP、规划、工具调用与治理",
+      "order": 40
+    },
+    {
+      "slug": "industrial-ai",
+      "name": "工业 AI",
+      "description": "机理与数据融合、时序分析、根因分析与人在回路",
+      "order": 50
+    }
+  ],
+  "tags": [
+    {
+      "slug": "clpm",
+      "name": "CLPM"
+    },
+    {
+      "slug": "pid",
+      "name": "PID"
+    },
+    {
+      "slug": "time-series",
+      "name": "时序分析"
+    },
+    {
+      "slug": "anomaly-detection",
+      "name": "异常检测"
+    },
+    {
+      "slug": "rag",
+      "name": "RAG"
+    },
+    {
+      "slug": "mcp",
+      "name": "MCP"
+    },
+    {
+      "slug": "opc-ua",
+      "name": "OPC UA"
+    },
+    {
+      "slug": "s88",
+      "name": "S88"
+    },
+    {
+      "slug": "s95",
+      "name": "S95"
+    },
+    {
+      "slug": "hybrid-modeling",
+      "name": "混合建模"
+    },
+    {
+      "slug": "digital-twin",
+      "name": "数字孪生"
+    },
+    {
+      "slug": "root-cause-analysis",
+      "name": "根因分析"
+    },
+    {
+      "slug": "ebm",
+      "name": "EBR"
+    },
+    {
+      "slug": "batch-identification",
+      "name": "批次识别"
+    },
+    {
+      "slug": "multivariate-analysis",
+      "name": "多变量分析"
+    },
+    {
+      "slug": "spc",
+      "name": "SPC"
+    },
+    {
+      "slug": "soft-sensing",
+      "name": "软测量"
+    },
+    {
+      "slug": "ai-governance",
+      "name": "AI 治理"
+    },
+    {
+      "slug": "industrial-ai",
+      "name": "工业 AI"
+    },
+    {
+      "slug": "foundation-model",
+      "name": "基础模型"
+    },
+    {
+      "slug": "optimization",
+      "name": "优化"
+    },
+    {
+      "slug": "process-monitoring",
+      "name": "过程监测"
+    },
+    {
+      "slug": "batch-control",
+      "name": "批控制"
+    },
+    {
+      "slug": "knowledge-graph",
+      "name": "知识图谱"
+    },
+    {
+      "slug": "agentic-systems",
+      "name": "智能体系统"
+    },
+    {
+      "slug": "energy",
+      "name": "能效"
+    },
+    {
+      "slug": "event",
+      "name": "事件"
+    },
+    {
+      "slug": "quality",
+      "name": "质量"
+    }
+  ],
+  "articles": [
+    {
+      "id": "yokogawa-ai-solutions",
+      "title": "Yokogawa AI Solutions",
+      "kind": "vendor",
+      "industry": "general",
+      "status": "published",
+      "summary": "基于过程自动化经验，将 AI 产品用于制造现场分析、预测与运营支持。",
+      "source_url": "https://www.yokogawa.com/solutions/solutions/ai/",
+      "source_title": "Yokogawa AI Solutions",
+      "source_org": "Yokogawa",
+      "source_type": "vendor",
+      "tags": [
+        "industrial-ai",
+        "process-monitoring",
+        "ai-governance"
+      ],
+      "categories": [
+        "process-monitoring",
+        "industrial-ai"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "基于过程自动化经验，将 AI 产品用于制造现场分析、预测与运营支持。"
+    },
+    {
+      "id": "units-unified-time-series-model",
+      "title": "UniTS",
+      "kind": "open-source",
+      "industry": "general",
+      "status": "published",
+      "summary": "使用共享模型与权重支持预测、分类、插补和异常检测等多种时间序列任务。",
+      "source_url": "https://github.com/mims-harvard/UniTS",
+      "source_title": "UniTS",
+      "source_org": "MIMS Harvard",
+      "source_type": "repo",
+      "tags": [
+        "time-series",
+        "foundation-model",
+        "anomaly-detection",
+        "industrial-ai"
+      ],
+      "categories": [
+        "industrial-ai"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "使用共享模型与权重支持预测、分类、插补和异常检测等多种时间序列任务。"
+    },
+    {
+      "id": "ua-netstandard",
+      "title": "UA-.NETStandard",
+      "kind": "open-source",
+      "industry": "general",
+      "status": "published",
+      "summary": "OPC Foundation 维护的跨平台 OPC UA .NET 实现，适合构建工业连接与信息模型服务。",
+      "source_url": "https://github.com/OPCFoundation/UA-.NETStandard",
+      "source_title": "UA-.NETStandard",
+      "source_org": "OPC Foundation",
+      "source_type": "repo",
+      "tags": [
+        "opc-ua",
+        "industrial-ai"
+      ],
+      "categories": [
+        "agentic-systems"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "OPC Foundation 维护的跨平台 OPC UA .NET 实现，适合构建工业连接与信息模型服务。"
+    },
+    {
+      "id": "time-series-library",
+      "title": "Time-Series-Library",
+      "kind": "open-source",
+      "industry": "general",
+      "status": "published",
+      "summary": "覆盖长短期预测、分类、异常检测和缺失值填补的深度时序研究代码库。",
+      "source_url": "https://github.com/thuml/Time-Series-Library",
+      "source_title": "Time-Series-Library",
+      "source_org": "THUML",
+      "source_type": "repo",
+      "tags": [
+        "time-series",
+        "anomaly-detection",
+        "industrial-ai"
+      ],
+      "categories": [
+        "industrial-ai"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "覆盖长短期预测、分类、异常检测和缺失值填补的深度时序研究代码库。"
+    },
+    {
+      "id": "smelting-stability-and-energy-assistant",
+      "title": "冶炼稳定性与能效助手",
+      "kind": "case",
+      "industry": "metallurgy",
+      "status": "published",
+      "summary": "将物料、能量、工况和质量置于同一上下文，识别波动传播、机会损失与操作改进空间。",
+      "source_url": "https://new.abb.com/process-automation/genix",
+      "source_title": "ABB Genix Industrial Analytics and AI Suite",
+      "source_org": "ABB",
+      "source_type": "vendor",
+      "tags": [
+        "process-monitoring",
+        "multivariate-analysis",
+        "root-cause-analysis",
+        "digital-twin"
+      ],
+      "categories": [
+        "process-monitoring",
+        "industrial-ai"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "将物料、能量、工况和质量置于同一上下文，识别波动传播、机会损失与操作改进空间。"
+    },
+    {
+      "id": "smelting-process-stability-assistant",
+      "title": "冶炼过程稳定性助手",
+      "kind": "case",
+      "industry": "metallurgy",
+      "status": "published",
+      "summary": "关联工艺窗口、物料状态与能源曲线，识别偏离的来源、传播路径与潜在损失。",
+      "source_url": "https://new.abb.com/process-automation/genix",
+      "source_title": "ABB Genix Industrial Analytics and AI Suite",
+      "source_org": "ABB",
+      "source_type": "vendor",
+      "tags": [
+        "process-monitoring",
+        "multivariate-analysis",
+        "root-cause-analysis",
+        "digital-twin"
+      ],
+      "categories": [
+        "process-monitoring",
+        "industrial-ai"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "关联工艺窗口、物料状态与能源曲线，识别偏离的来源、传播路径与潜在损失。"
+    },
+    {
+      "id": "siemens-industrial-ai",
+      "title": "Siemens Industrial AI",
+      "kind": "vendor",
+      "industry": "general",
+      "status": "published",
+      "summary": "覆盖工业设计、制造实现、运行优化与数据上下文化的端到端工业 AI 叙事与产品组合。",
+      "source_url": "https://www.siemens.com/en-us/company/artificial-intelligence/industrial-ai/",
+      "source_title": "Siemens Industrial AI",
+      "source_org": "Siemens",
+      "source_type": "vendor",
+      "tags": [
+        "industrial-ai",
+        "digital-twin",
+        "opc-ua"
+      ],
+      "categories": [
+        "industrial-ai",
+        "agentic-systems"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "覆盖工业设计、制造实现、运行优化与数据上下文化的端到端工业 AI 叙事与产品组合。"
+    },
+    {
+      "id": "schneider-electric-industrial-ai",
+      "title": "Schneider Electric Industrial AI",
+      "kind": "vendor",
+      "industry": "general",
+      "status": "published",
+      "summary": "围绕 EcoStruxure 与 AVEVA 生态连接能源管理、自动化、工业软件和数据分析。",
+      "source_url": "https://www.se.com/ww/en/work/solutions/artificial-intelligence/",
+      "source_title": "Schneider Electric Industrial AI",
+      "source_org": "Schneider Electric",
+      "source_type": "vendor",
+      "tags": [
+        "industrial-ai",
+        "digital-twin",
+        "energy",
+        "ai-governance"
+      ],
+      "categories": [
+        "industrial-ai",
+        "agentic-systems"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "围绕 EcoStruxure 与 AVEVA 生态连接能源管理、自动化、工业软件和数据分析。"
+    },
+    {
+      "id": "opc-ua-online-specification",
+      "title": "OPC UA 在线规范",
+      "kind": "standard",
+      "industry": "general",
+      "status": "published",
+      "summary": "面向工业互操作、安全通信和对象化信息模型的官方可检索规范入口。",
+      "source_url": "https://reference.opcfoundation.org/",
+      "source_title": "OPC UA Reference",
+      "source_org": "OPC Foundation",
+      "source_type": "standard",
+      "tags": [
+        "opc-ua",
+        "industrial-ai"
+      ],
+      "categories": [
+        "agentic-systems"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "面向工业互操作、安全通信和对象化信息模型的官方可检索规范入口。"
+    },
+    {
+      "id": "opc-ua",
+      "title": "OPC UA",
+      "kind": "standard",
+      "industry": "general",
+      "status": "published",
+      "summary": "跨设备、控制与企业系统的安全互操作及信息建模基础。",
+      "source_url": "https://opcfoundation.org/about/opc-technologies/opc-ua/",
+      "source_title": "OPC UA",
+      "source_org": "OPC Foundation",
+      "source_type": "standard",
+      "tags": [
+        "opc-ua",
+        "industrial-ai"
+      ],
+      "categories": [
+        "agentic-systems"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "跨设备、控制与企业系统的安全互操作及信息建模基础。"
+    },
+    {
+      "id": "no-batch-scenario-batch-identification",
+      "title": "无 BATCH 场景的批次识别",
+      "kind": "case",
+      "industry": "agrochemical",
+      "status": "published",
+      "summary": "利用 DCS 时序、操作事件和规则自动推断批次、工序与步序，为轻量批次分析补齐时间语义。",
+      "source_url": "https://www.isa.org/standards-and-publications/isa-standards/isa-88-standard",
+      "source_title": "ISA-88 Batch Control Standard",
+      "source_org": "ISA",
+      "source_type": "standard",
+      "tags": [
+        "batch-identification",
+        "time-series",
+        "event",
+        "s88"
+      ],
+      "categories": [
+        "batch-control"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "从 DCS 时序和操作事件中识别批次、工序与步序，为无 BATCH/MES 现场补齐轻量语义。"
+    },
+    {
+      "id": "nist-ai-risk-management-framework",
+      "title": "NIST AI Risk Management Framework",
+      "kind": "standard",
+      "industry": "general",
+      "status": "published",
+      "summary": "从治理、映射、度量和管理四类活动建立 AI 风险管理框架，可用于工业智能体治理基线。",
+      "source_url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "source_title": "AI Risk Management Framework",
+      "source_org": "NIST",
+      "source_type": "standard",
+      "tags": [
+        "ai-governance",
+        "agentic-systems",
+        "industrial-ai"
+      ],
+      "categories": [
+        "agentic-systems",
+        "industrial-ai"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "从治理、映射、度量和管理四类活动建立 AI 风险管理框架，可用于工业智能体治理基线。"
+    },
+    {
+      "id": "namur-open-architecture",
+      "title": "NAMUR Open Architecture",
+      "kind": "standard",
+      "industry": "general",
+      "status": "published",
+      "summary": "通过开放但受控的监测与优化通道利用生产数据，同时保持核心控制域的稳定和安全。",
+      "source_url": "https://www.namur.net/en/work-areas-and-project-groups/focus-topics/namur-open-architecture.html",
+      "source_title": "NAMUR Open Architecture",
+      "source_org": "NAMUR",
+      "source_type": "standard",
+      "tags": [
+        "process-monitoring",
+        "industrial-ai",
+        "ai-governance"
+      ],
+      "categories": [
+        "process-monitoring",
+        "agentic-systems"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "在不干扰核心控制的前提下，安全利用生产数据开展监测与优化。"
+    },
+    {
+      "id": "moment-timeseries-foundation-model",
+      "title": "MOMENT",
+      "kind": "open-source",
+      "industry": "general",
+      "status": "published",
+      "summary": "面向预测、分类、异常检测与插补的开源通用时间序列基础模型家族。",
+      "source_url": "https://github.com/moment-timeseries-foundation-model/moment",
+      "source_title": "MOMENT",
+      "source_org": "moment-timeseries-foundation-model",
+      "source_type": "repo",
+      "tags": [
+        "time-series",
+        "foundation-model",
+        "anomaly-detection",
+        "industrial-ai"
+      ],
+      "categories": [
+        "industrial-ai"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "面向预测、分类、异常检测与插补的开源通用时间序列基础模型家族。"
+    },
+    {
+      "id": "mechanism-data-fusion-modeling",
+      "title": "机理—数据融合建模",
+      "kind": "principle",
+      "industry": "general",
+      "status": "published",
+      "summary": "把质量守恒、能量守恒、动力学约束与机器学习结合，提升小样本场景的可解释性和外推稳定性。",
+      "source_url": "https://www.aspentech.com/en/cp/industrial-ai",
+      "source_title": "AspenTech Industrial AI",
+      "source_org": "AspenTech",
+      "source_type": "vendor",
+      "tags": [
+        "hybrid-modeling",
+        "digital-twin",
+        "industrial-ai",
+        "soft-sensing"
+      ],
+      "categories": [
+        "industrial-ai"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "把质量守恒、能量守恒、动力学约束与机器学习结合，提升小样本场景的可解释性和外推稳定性。"
+    },
+    {
+      "id": "kiln-operation-optimization-agent",
+      "title": "窑炉运行优化智能体",
+      "kind": "case",
+      "industry": "building-material",
+      "status": "published",
+      "summary": "把质量、煤耗、温度场和设备状态置于同一决策上下文，支持操作方案对比。",
+      "source_url": "https://www.aspentech.com/en/cp/industrial-ai",
+      "source_title": "AspenTech Industrial AI",
+      "source_org": "AspenTech",
+      "source_type": "vendor",
+      "tags": [
+        "soft-sensing",
+        "optimization",
+        "hybrid-modeling",
+        "digital-twin"
+      ],
+      "categories": [
+        "industrial-ai",
+        "process-monitoring"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "把质量、煤耗、温度场和设备状态置于同一决策上下文，支持操作方案对比。"
+    },
+    {
+      "id": "isa-95-iec-62264",
+      "title": "ISA-95 / IEC 62264",
+      "kind": "standard",
+      "industry": "general",
+      "status": "published",
+      "summary": "组织企业计划与制造运营、控制之间的活动、对象和接口，是工业语义分层的重要参考。",
+      "source_url": "https://www.isa.org/standards-and-publications/isa-standards/isa-95-standard",
+      "source_title": "ISA-95 / IEC 62264 Standard",
+      "source_org": "ISA",
+      "source_type": "standard",
+      "tags": [
+        "s95",
+        "industrial-ai",
+        "process-monitoring"
+      ],
+      "categories": [
+        "batch-control",
+        "process-monitoring"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "定义企业与制造控制系统的活动边界、对象和集成接口。"
+    },
+    {
+      "id": "isa-88-batch-control",
+      "title": "ISA-88 Batch Control",
+      "kind": "standard",
+      "industry": "general",
+      "status": "published",
+      "summary": "定义批控制的过程模型、物理模型和程序控制模型，适用于医药与精细化工批次语义建设。",
+      "source_url": "https://www.isa.org/standards-and-publications/isa-standards/isa-88-standard",
+      "source_title": "ISA-88 Batch Control Standard",
+      "source_org": "ISA",
+      "source_type": "standard",
+      "tags": [
+        "s88",
+        "batch-control",
+        "ebm"
+      ],
+      "categories": [
+        "batch-control"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "定义批控制的过程模型、物理模型和程序控制模型，适用于医药与精细化工批次语义建设。"
+    },
+    {
+      "id": "industrial-time-series-anomaly-detection",
+      "title": "工业时序异常检测",
+      "kind": "principle",
+      "industry": "general",
+      "status": "published",
+      "summary": "比较阈值、统计过程控制、预测残差、重构误差和基础模型方法，并关注工况切换与标签稀缺。",
+      "source_url": "https://github.com/thuml/Time-Series-Library",
+      "source_title": "Time-Series-Library",
+      "source_org": "THUML",
+      "source_type": "repo",
+      "tags": [
+        "time-series",
+        "anomaly-detection",
+        "spc",
+        "industrial-ai"
+      ],
+      "categories": [
+        "process-monitoring",
+        "industrial-ai"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "比较阈值、统计过程控制、预测残差、重构误差和基础模型方法，并关注工况切换与标签稀缺。"
+    },
+    {
+      "id": "industrial-iot-patterns",
+      "title": "Industrial IoT Patterns",
+      "kind": "open-source",
+      "industry": "general",
+      "status": "published",
+      "summary": "涵盖 OPC UA、异常检测、根因分析、OEE 与数字孪生的工程模式。",
+      "source_url": "https://github.com/Azure-Samples/industrial-iot-patterns",
+      "source_title": "Industrial IoT Patterns",
+      "source_org": "Microsoft Samples",
+      "source_type": "repo",
+      "tags": [
+        "opc-ua",
+        "anomaly-detection",
+        "root-cause-analysis",
+        "digital-twin",
+        "industrial-ai"
+      ],
+      "categories": [
+        "process-monitoring",
+        "industrial-ai"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "涵盖 OPC UA、异常检测、根因分析、OEE 与数字孪生的工程模式。"
+    },
+    {
+      "id": "hybrid-industrial-rag",
+      "title": "混合式工业 RAG",
+      "kind": "principle",
+      "industry": "general",
+      "status": "published",
+      "summary": "同时检索标准文档、结构化对象、知识图谱和时间窗口数据，回答必须附带来源、时间和工况。",
+      "source_url": "https://modelcontextprotocol.io/",
+      "source_title": "Model Context Protocol",
+      "source_org": "Anthropic",
+      "source_type": "blog",
+      "tags": [
+        "rag",
+        "mcp",
+        "knowledge-graph",
+        "agentic-systems"
+      ],
+      "categories": [
+        "agentic-systems",
+        "industrial-ai"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "同时检索标准文档、结构化对象、知识图谱和时间窗口数据，回答必须附带来源、时间和工况。"
+    },
+    {
+      "id": "human-in-the-loop-and-progressive-autonomy",
+      "title": "人在回路与渐进式自治",
+      "kind": "principle",
+      "industry": "general",
+      "status": "published",
+      "summary": "依据动作风险将智能体分为检索、分析、建议、审批式执行和自治五级，并分别设置验证与审计。",
+      "source_url": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "source_title": "AI Risk Management Framework",
+      "source_org": "NIST",
+      "source_type": "standard",
+      "tags": [
+        "ai-governance",
+        "agentic-systems",
+        "mcp",
+        "industrial-ai"
+      ],
+      "categories": [
+        "agentic-systems",
+        "industrial-ai"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "依据动作风险将智能体分为检索、分析、建议、审批式执行和自治五级，并分别设置验证与审计。"
+    },
+    {
+      "id": "high-purity-process-anomaly-guard",
+      "title": "高纯过程异常守卫",
+      "kind": "case",
+      "industry": "electronic-chemical",
+      "status": "published",
+      "summary": "组合 SPC、软测量、多变量异常检测与专家规则，在质量结果滞后时提供早期风险提示。",
+      "source_url": "https://github.com/thuml/Time-Series-Library",
+      "source_title": "Time-Series-Library",
+      "source_org": "THUML",
+      "source_type": "repo",
+      "tags": [
+        "spc",
+        "soft-sensing",
+        "multivariate-analysis",
+        "anomaly-detection",
+        "time-series"
+      ],
+      "categories": [
+        "process-monitoring",
+        "industrial-ai"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "面向微小漂移与多变量耦合，协同规则、统计模型和专家知识完成早期预警。"
+    },
+    {
+      "id": "hai-security-dataset",
+      "title": "HAI Security Dataset",
+      "kind": "open-source",
+      "industry": "general",
+      "status": "published",
+      "summary": "用于工业控制系统异常与网络攻击研究的硬件在环数据集，并附带相关研究线索。",
+      "source_url": "https://github.com/icsdataset/hai",
+      "source_title": "HAI Security Dataset",
+      "source_org": "ICS Dataset",
+      "source_type": "repo",
+      "tags": [
+        "anomaly-detection",
+        "industrial-ai",
+        "ai-governance"
+      ],
+      "categories": [
+        "process-monitoring",
+        "agentic-systems"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "面向工业控制系统异常与网络攻击研究的硬件在环数据集。"
+    },
+    {
+      "id": "hai-dataset",
+      "title": "HAI Dataset",
+      "kind": "open-source",
+      "industry": "general",
+      "status": "published",
+      "summary": "用于工业控制系统异常与网络攻击研究的硬件在环数据集，并附带相关研究线索。",
+      "source_url": "https://github.com/icsdataset/hai",
+      "source_title": "HAI Security Dataset",
+      "source_org": "ICS Dataset",
+      "source_type": "repo",
+      "tags": [
+        "anomaly-detection",
+        "industrial-ai",
+        "ai-governance"
+      ],
+      "categories": [
+        "process-monitoring",
+        "agentic-systems"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "面向工业控制系统异常与网络攻击研究的硬件在环数据集。"
+    },
+    {
+      "id": "control-loop-diagnostic-agent",
+      "title": "控制回路诊断智能体",
+      "kind": "case",
+      "industry": "chemical",
+      "status": "published",
+      "summary": "从回路筛选、指标计算、振荡与粘滞诊断，到原因解释和整定建议的完整智能体能力链。",
+      "source_url": "https://www.isa.org/intech-home/2021/june-2021/features/control-loop-performance-monitoring",
+      "source_title": "Control Loop Performance Monitoring",
+      "source_org": "ISA",
+      "source_type": "paper",
+      "tags": [
+        "clpm",
+        "pid",
+        "time-series",
+        "root-cause-analysis"
+      ],
+      "categories": [
+        "control-loop-diagnosis"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "融合 PID 性能指标、振荡检测、阀门粘滞诊断与机理解释，生成可追溯的处置建议。"
+    },
+    {
+      "id": "coating-formulation-process-quality-analysis",
+      "title": "配方—过程—质量分析",
+      "kind": "case",
+      "industry": "coating",
+      "status": "published",
+      "summary": "连接配方版本、投料顺序、过程轨迹和质量结果，支持跨批次对标与异常解释。",
+      "source_url": "https://www.isa.org/standards-and-publications/isa-standards/isa-95-standard",
+      "source_title": "ISA-95 / IEC 62264 Standard",
+      "source_org": "ISA",
+      "source_type": "standard",
+      "tags": [
+        "batch-identification",
+        "multivariate-analysis",
+        "quality",
+        "s95"
+      ],
+      "categories": [
+        "batch-control",
+        "process-monitoring"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "连接配方版本、投料顺序、过程轨迹和质量结果，支持跨批次对标与异常解释。"
+    },
+    {
+      "id": "causal-and-root-cause-analysis",
+      "title": "因果与根因分析",
+      "kind": "principle",
+      "industry": "general",
+      "status": "published",
+      "summary": "区分相关、时滞、过程拓扑和因果机制，将候选原因沿设备与物流关系进行评分、排序和验证。",
+      "source_url": "https://github.com/Azure-Samples/industrial-iot-patterns",
+      "source_title": "Industrial IoT Patterns",
+      "source_org": "Microsoft Samples",
+      "source_type": "repo",
+      "tags": [
+        "root-cause-analysis",
+        "multivariate-analysis",
+        "process-monitoring",
+        "industrial-ai"
+      ],
+      "categories": [
+        "process-monitoring",
+        "industrial-ai"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "区分相关、时滞、过程拓扑和因果机制，将候选原因沿设备与物流关系进行评分、排序和验证。"
+    },
+    {
+      "id": "batch-record-review-agent",
+      "title": "批记录审阅智能体",
+      "kind": "case",
+      "industry": "pharma",
+      "status": "published",
+      "summary": "沿 S88 批次层级自动核查关键步骤、偏差与电子记录，保留证据链和审批边界。",
+      "source_url": "https://www.isa.org/standards-and-publications/isa-standards/isa-88-standard",
+      "source_title": "ISA-88 Batch Control Standard",
+      "source_org": "ISA",
+      "source_type": "standard",
+      "tags": [
+        "s88",
+        "ebm",
+        "batch-control",
+        "ai-governance"
+      ],
+      "categories": [
+        "batch-control",
+        "agentic-systems"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "沿 S88 批次层级自动核查关键步骤、偏差与电子记录，保留证据链和审批边界。"
+    },
+    {
+      "id": "batch-record-intelligent-review",
+      "title": "批记录智能审阅",
+      "kind": "case",
+      "industry": "pharma",
+      "status": "published",
+      "summary": "围绕批次、工序、步序和关键参数自动核查偏差，输出证据定位与风险分级，保留人工批准。",
+      "source_url": "https://www.isa.org/standards-and-publications/isa-standards/isa-88-standard",
+      "source_title": "ISA-88 Batch Control Standard",
+      "source_org": "ISA",
+      "source_type": "standard",
+      "tags": [
+        "s88",
+        "ebm",
+        "batch-control",
+        "ai-governance"
+      ],
+      "categories": [
+        "batch-control",
+        "agentic-systems"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "沿 S88 批次层级自动核查关键步骤、偏差与电子记录，保留证据链和审批边界。"
+    },
+    {
+      "id": "batch-condition-identification-and-traceability",
+      "title": "批次工况识别与追溯",
+      "kind": "case",
+      "industry": "agrochemical",
+      "status": "published",
+      "summary": "从 DCS 时序和操作事件中识别批次、工序与步序，为无 BATCH/MES 现场补齐轻量语义。",
+      "source_url": "https://www.isa.org/standards-and-publications/isa-standards/isa-88-standard",
+      "source_title": "ISA-88 Batch Control Standard",
+      "source_org": "ISA",
+      "source_type": "standard",
+      "tags": [
+        "batch-identification",
+        "time-series",
+        "event",
+        "s88"
+      ],
+      "categories": [
+        "batch-control"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "从 DCS 时序和操作事件中识别批次、工序与步序，为无 BATCH/MES 现场补齐轻量语义。"
+    },
+    {
+      "id": "aspentech-industrial-ai",
+      "title": "AspenTech Industrial AI",
+      "kind": "vendor",
+      "industry": "general",
+      "status": "published",
+      "summary": "强调将物理、化学与工程知识同 AI 结合，覆盖流程模拟、APM、计划调度与运营优化。",
+      "source_url": "https://www.aspentech.com/en/cp/industrial-ai",
+      "source_title": "AspenTech Industrial AI",
+      "source_org": "AspenTech",
+      "source_type": "vendor",
+      "tags": [
+        "industrial-ai",
+        "hybrid-modeling",
+        "digital-twin",
+        "optimization"
+      ],
+      "categories": [
+        "industrial-ai"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "强调将物理、化学与工程知识同 AI 结合，覆盖流程模拟、APM、计划调度与运营优化。"
+    },
+    {
+      "id": "abb-genix",
+      "title": "ABB Genix",
+      "kind": "vendor",
+      "industry": "general",
+      "status": "published",
+      "summary": "面向工业数据上下文化、资产绩效、异常检测、机会损失和生成式 AI 的平台与应用组合。",
+      "source_url": "https://new.abb.com/process-automation/genix",
+      "source_title": "ABB Genix Industrial Analytics and AI Suite",
+      "source_org": "ABB",
+      "source_type": "vendor",
+      "tags": [
+        "industrial-ai",
+        "process-monitoring",
+        "multivariate-analysis",
+        "digital-twin"
+      ],
+      "categories": [
+        "process-monitoring",
+        "industrial-ai"
+      ],
+      "reviewed_by": "致联工业 AI 研究",
+      "reviewed_at": "2026-07-13T00:00:00Z",
+      "created_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-13T00:00:00Z",
+      "body": "面向工业数据上下文化、资产绩效、异常检测、机会损失和生成式 AI 的平台与应用组合。"
+    }
+  ],
+  "drafts": []
+}
