@@ -213,7 +213,16 @@ export default function Home() {
         <div className="practice-grid"><article><b>01</b><h3>定义问题</h3><p>锁定决策对象、价值、频率与错误成本。</p></article><article><b>02</b><h3>建立上下文</h3><p>统一对象、时间、工况与证据来源。</p></article><article><b>03</b><h3>工具化能力</h3><p>将既有算法和工业软件封装为可调用工具。</p></article><article><b>04</b><h3>渐进式自治</h3><p>从检索、解释、建议走向审批式执行。</p></article></div>
       </section>
 
-      <footer><div className="brand"><span className="brand-mark" aria-hidden="true"><i/><i/><i/></span><span>流程工业 <b>AI</b> 与智能体</span></div><p>连接工业知识、实时数据、模型与可信行动。</p><a href="#top">回到顶部 ↑</a></footer>
+      <footer>
+        <div className="footer-main">
+          <div className="brand"><span className="brand-mark" aria-hidden="true"><i/><i/><i/></span><span>流程工业 <b>AI</b> 与智能体</span></div>
+          <p>连接工业知识、实时数据、模型与可信行动。</p>
+          <a href="#top">回到顶部 ↑</a>
+        </div>
+        <div className="footer-bottom">
+          <span>© {new Date().getFullYear()} 致联工业 AI 研究 · 研究与实践门户</span>
+        </div>
+      </footer>
     </main>
   );
 }
