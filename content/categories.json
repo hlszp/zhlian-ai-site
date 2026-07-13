@@ -1,0 +1,32 @@
+[
+  {
+    "slug": "control-loop-diagnosis",
+    "name": "控制回路诊断",
+    "description": "围绕 PID、振荡、粘滞、阀门定位等控制回路性能问题",
+    "order": 10
+  },
+  {
+    "slug": "process-monitoring",
+    "name": "过程监测",
+    "description": "实时工况、异常检测与多变量分析",
+    "order": 20
+  },
+  {
+    "slug": "batch-control",
+    "name": "批控制",
+    "description": "S88/S95 批次建模、批记录与合规",
+    "order": 30
+  },
+  {
+    "slug": "agentic-systems",
+    "name": "智能体系统",
+    "description": "RAG、MCP、规划、工具调用与治理",
+    "order": 40
+  },
+  {
+    "slug": "industrial-ai",
+    "name": "工业 AI",
+    "description": "机理与数据融合、时序分析、根因分析与人在回路",
+    "order": 50
+  }
+]
