@@ -2,6 +2,14 @@
 
 本仓库是 `https://ai.zlinfot.com` 的唯一源代码仓库。网站采用 React、TypeScript 和 Vite 构建为静态文件，并由 Nginx 托管。
 
+## 项目小结
+
+这是 ZHILIAN 的流程工业 AI 与智能体知识网站。当前版本以一个轻量、可持续扩展的静态站点为目标：用案例、方法、论文和工具信息帮助读者理解流程工业中的 AI 应用，暂不承担登录、在线推理、交易或后台管理职能。
+
+当前内容仍集中在 `src/App.tsx`，`src/styles.css` 负责视觉样式；`content/` 已预留为下一阶段的内容数据目录。后续增加知识和案例时，应优先保持内容结构清晰、来源可追溯，并避免把未经核验的宣传性结论写入页面。
+
+仓库中的 `zhilianAI-guid.md` 是项目工作指引，不参与构建和部署，也不应被提交进发布包。
+
 ## 本地开发与验证
 
 ```bash
@@ -153,7 +161,27 @@ sudo systemctl reload nginx
 
 ## GitHub Actions 自动部署
 
-[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) 在代码推送到 `main` 后自动部署，也支持在 Actions 页面手动触发。工作流会完成构建、SHA-256 校验、SSH 上传、服务器再次校验、非 root 原子发布、服务器本地健康检查和公网 HTTP 健康检查。公网检查失败时会自动回滚到 `previous`。
+项目有两条 GitHub Actions 工作流：
+
+- [`ci.yml`](.github/workflows/ci.yml)：在 Pull Request 和 `main` 推送时运行 `npm ci`、Vite 构建、部署脚本测试和发布包校验；它不读取生产密钥。
+- [`deploy.yml`](.github/workflows/deploy.yml)：在 `main` 推送或手动触发时运行生产发布。它先等待同一工作流的 `build` Job 成功，再把经过 SHA-256 校验的发布包传给独立的 `deploy` Job。
+
+生产部署的具体链路如下：
+
+1. `build` Job 在无生产密钥的 Runner 上安装依赖、运行 `bash tests/deploy-scripts.sh`、执行 `scripts/package.sh`，并上传只包含静态文件、服务器脚本、Nginx 配置和 `RELEASE` 元数据的 Artifact。
+2. `deploy` Job 进入 GitHub `production` Environment，只下载并再次校验 Artifact，不 checkout 源代码，也不在密钥落盘后执行工作区脚本。
+3. 工作流使用固定的 SSH host key 和专用 `PROD_SSH_KEY`，将包上传到服务器的 `/var/tmp/zhilian-deploy/<release-id>`。
+4. 服务器再次校验 SHA-256 和 tar 路径，使用无 sudo 的 `zhilian-deploy` 执行 `server/deploy.sh --static-only`。部署通过 `flock` 串行化，创建新 release 后原子切换 `current`，不 reload Nginx。
+5. Runner 通过 `PROD_URL` 检查首页文本和首个 JS/CSS 资源。公网检查失败时，工作流只在确认失败版本仍是 `current` 后执行静态回滚，并清理远程临时包和 Runner 上的 SSH 材料。
+
+自动部署的日常使用方式：
+
+- 普通更新：创建 PR，等待 `CI` 通过，合并到 `main`；合并会自动触发生产部署。
+- 手动发布：在 GitHub Actions 中选择 `Deploy production`，点击 `Run workflow`，目标分支选择 `main`。
+- 查看结果：检查 `CI` 和 `Deploy production` 两个工作流；生产页面和静态资源必须返回 HTTP 200。
+- 需要回退时：优先在 Actions 中重新运行失败的 `Deploy production` 工作流；必要时由管理员 SSH 登录服务器执行 `bash server/rollback.sh --app-root /opt/zlinfot-ai --static-only`。
+
+正常内容发布不需要手工连接云服务器，也不需要修改 DNS、TLS、防火墙或 Nginx 配置。只有基础设施变更和首次服务器初始化才需要管理员操作和单独批准。
 
 GitHub 仓库需要创建名为 `production` 的 Environment，并配置：
 
@@ -166,6 +194,8 @@ GitHub 仓库需要创建名为 `production` 的 Environment，并配置：
 | Variable | `PROD_UPLOAD_DIR` | `/var/tmp/zhilian-deploy` |
 | Secret | `PROD_SSH_KEY` | 仅供 GitHub Actions 使用的部署私钥 |
 | Secret | `PROD_KNOWN_HOSTS` | 经管理员核验的服务器 SSH host key，非运行时自动信任 |
+
+其中 `PROD_SSH_KEY` 只在 `deploy` Job 的 SSH 配置步骤注入；不要把私钥、host key、服务器密码或任何 `.env` 文件写入仓库。`production` Environment 当前限定部署分支为 `main`，并通过 `concurrency` 保证同一时间只有一个生产发布。
 
 服务器需要一次性完成：
 
