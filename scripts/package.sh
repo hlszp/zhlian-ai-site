@@ -7,7 +7,9 @@ cd "$ROOT"
 command -v npm >/dev/null 2>&1 || { echo "错误：未找到 npm。" >&2; exit 1; }
 command -v tar >/dev/null 2>&1 || { echo "错误：未找到 tar。" >&2; exit 1; }
 
-npm run build
+npm run build --prefix frontend
+
+cd "$ROOT"
 
 [[ -f dist/index.html ]] || { echo "错误：构建结果缺少 dist/index.html。" >&2; exit 1; }
 
