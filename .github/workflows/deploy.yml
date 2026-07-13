@@ -22,6 +22,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -32,7 +33,6 @@ jobs:
 
       - name: Build and package
         id: package
-        working-directory: frontend
         shell: bash
         run: |
           set -euo pipefail
