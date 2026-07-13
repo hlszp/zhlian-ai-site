@@ -1,0 +1,13 @@
+node_modules/
+dist/
+site/
+.npm-cache/
+.env
+.env.*
+!.env.example
+*.log
+*.tar.gz
+*.sha256
+.DS_Store
+.idea/
+.vscode/
