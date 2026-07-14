@@ -1,3 +1,4 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import type { SiteData } from "./types";
 import Header from "./components/Header";
@@ -10,9 +11,10 @@ import LibrarySection from "./components/LibrarySection";
 import ResourcesSection from "./components/ResourcesSection";
 import PracticeSection from "./components/PracticeSection";
 import Footer from "./components/Footer";
+import AdminApp from "./admin/AdminApp";
 import siteData from "../public/site-data.json";
 
-export default function App() {
+function HomePortal() {
   const data = siteData as SiteData;
   const [activeNode, setActiveNode] = useState("agent");
 
@@ -29,5 +31,16 @@ export default function App() {
       <PracticeSection />
       <Footer />
     </main>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/admin/*" element={<AdminApp />} />
+        <Route path="/" element={<HomePortal />} />
+      </Routes>
+    </BrowserRouter>
   );
 }

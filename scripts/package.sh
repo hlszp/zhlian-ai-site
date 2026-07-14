@@ -7,11 +7,16 @@ cd "$ROOT"
 command -v npm >/dev/null 2>&1 || { echo "错误：未找到 npm。" >&2; exit 1; }
 command -v tar >/dev/null 2>&1 || { echo "错误：未找到 tar。" >&2; exit 1; }
 
+# Frontend build
 npm run build --prefix frontend
+
+# Backend smoke check
+( cd backend && .venv/bin/python -c "import app.main" )
 
 cd "$ROOT"
 
-[[ -f dist/index.html ]] || { echo "错误：构建结果缺少 dist/index.html。" >&2; exit 1; }
+OUT_DIR="dist"
+[[ -f "$OUT_DIR/index.html" ]] || { echo "错误：构建结果缺少 $OUT_DIR/index.html。" >&2; exit 1; }
 
 BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 STAMP="$(date -u +%Y%m%d-%H%M%S)"
@@ -21,16 +26,20 @@ ARCHIVE="$RELEASE_NAME.tar.gz"
 STAGING="$(mktemp -d "${TMPDIR:-/tmp}/process-industry-ai.XXXXXX")"
 trap 'rm -rf "$STAGING"' EXIT
 
-mkdir -p "$STAGING/$RELEASE_NAME/site" "$STAGING/$RELEASE_NAME/server"
-cp -a dist/. "$STAGING/$RELEASE_NAME/site/"
-cp -a \
-  server/ai.zlinfot.com.conf \
-  server/deploy.sh \
-  server/enable-https.sh \
-  server/health-check.sh \
-  server/install.sh \
-  server/rollback.sh \
-  "$STAGING/$RELEASE_NAME/server/"
+mkdir -p "$STAGING/$RELEASE_NAME/site"          "$STAGING/$RELEASE_NAME/server"          "$STAGING/$RELEASE_NAME/backend"
+
+cp -a "$OUT_DIR/". "$STAGING/$RELEASE_NAME/site/"
+cp -a   server/ai.zlinfot.com.conf   server/staging.ai.zlinfot.com.conf   server/deploy.sh   server/rollback.sh   server/health-check.sh   server/enable-https.sh   server/install.sh   server/backend-deploy.sh   server/backend-rollback.sh   "$STAGING/$RELEASE_NAME/server/"
+mkdir -p "$STAGING/$RELEASE_NAME/server/systemd"
+cp server/systemd/zlai-backend.service "$STAGING/$RELEASE_NAME/server/systemd/"
+
+# Backend code (excluding virtualenv and test databases)
+find backend -type f   -not -path 'backend/.venv/*'   -not -path 'backend/*.db'   -not -path 'backend/__pycache__/*'   -not -path 'backend/*/__pycache__/*'   -not -path 'backend/.pytest_cache/*'   -not -name '*.pyc' | while IFS= read -r file; do
+    rel="${file#backend/}"
+    dest="$STAGING/$RELEASE_NAME/backend/$rel"
+    mkdir -p "$(dirname "$dest")"
+    cp -a "$file" "$dest"
+done
 
 cat > "$STAGING/$RELEASE_NAME/RELEASE" <<EOF
 release_name=$RELEASE_NAME

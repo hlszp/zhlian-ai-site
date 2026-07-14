@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zhilianai-site-backend"
+version = "0.1.0"
+description = "FastAPI backend for zhilianAI-site content management"
+requires-python = ">=3.11"
+authors = [
+    { name = "ZhiLian Info", email = "dev@zlinfot.com" },
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3.11",
+    "Framework :: FastAPI",
+]
+dependencies = [
+    "fastapi>=0.115,<0.116",
+    "uvicorn>=0.34,<0.35",
+    "sqlalchemy>=2.0,<2.1",
+    "psycopg2-binary>=2.9,<3.0",
+    "pydantic>=2.11,<2.12",
+    "pydantic-settings>=2.9,<2.10",
+    "python-dotenv>=1.1,<1.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4,<9.0",
+    "pytest-asyncio>=0.26,<0.27",
+    "httpx>=0.28,<0.29",
+]
+
+[tool.setuptools.packages.find]
+where = ["app"]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["app"]

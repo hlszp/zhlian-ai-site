@@ -1,0 +1,299 @@
+name: Deploy staging
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt pytest httpx
+        working-directory: backend
+
+      - name: Run backend tests
+        run: DATABASE_URL=sqlite:///./test.db python -m pytest -q
+        working-directory: backend
+
+      - name: Build frontend
+        run: |
+          npm ci
+          npm run build
+        working-directory: frontend
+
+      - name: Test deployment scripts
+        run: bash tests/deploy-scripts.sh
+
+      - name: Build and package
+        id: package
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/package.sh
+          mapfile -t archives < <(find . -maxdepth 1 -type f -name 'process-industry-ai-*.tar.gz' -print)
+          [[ ${#archives[@]} -eq 1 ]] || { echo "Expected exactly one release archive" >&2; exit 1; }
+          archive="${archives[0]#./}"
+          [[ -f "$archive.sha256" ]] || { echo "Missing checksum for $archive" >&2; exit 1; }
+          sha256sum -c "$archive.sha256"
+          echo "archive=$archive" >> "$GITHUB_OUTPUT"
+
+      - name: Upload verified release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-release
+          path: |
+            ${{ steps.package.outputs.archive }}
+            ${{ steps.package.outputs.archive }}.sha256
+          if-no-files-found: error
+          retention-days: 7
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      STAGING_HOST: ${{ vars.STAGING_HOST }}
+      STAGING_PORT: ${{ vars.STAGING_PORT }}
+      STAGING_USER: ${{ vars.STAGING_USER }}
+      STAGING_URL: ${{ vars.STAGING_URL }}
+      STAGING_UPLOAD_DIR: ${{ vars.STAGING_UPLOAD_DIR }}
+    steps:
+      - name: Download verified release artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: staging-release
+          path: release-artifact
+
+      - name: Validate deployment configuration and artifact
+        id: metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in STAGING_HOST STAGING_PORT STAGING_USER STAGING_URL STAGING_UPLOAD_DIR; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "Missing staging environment value: $name" >&2
+              exit 1
+            fi
+          done
+          [[ "$STAGING_PORT" =~ ^[1-9][0-9]{0,4}$ ]] || { echo "Invalid STAGING_PORT" >&2; exit 1; }
+          (( STAGING_PORT <= 65535 )) || { echo "Invalid STAGING_PORT" >&2; exit 1; }
+          [[ "$STAGING_USER" =~ ^[a-z_][a-z0-9_-]*$ ]] || { echo "Invalid STAGING_USER" >&2; exit 1; }
+          [[ "$STAGING_HOST" =~ ^[A-Za-z0-9.-]+$ ]] || { echo "Invalid STAGING_HOST" >&2; exit 1; }
+          [[ "$STAGING_URL" =~ ^https?://[^[:space:]]+$ ]] || { echo "Invalid STAGING_URL" >&2; exit 1; }
+          [[ "$STAGING_UPLOAD_DIR" =~ ^/[A-Za-z0-9._/-]+$ ]] || { echo "Invalid STAGING_UPLOAD_DIR" >&2; exit 1; }
+          [[ ! "$STAGING_UPLOAD_DIR" =~ (^|/)\.\.(/|$) ]] || { echo "Invalid STAGING_UPLOAD_DIR" >&2; exit 1; }
+          cd "$GITHUB_WORKSPACE/release-artifact"
+          mapfile -t archives < <(find . -maxdepth 1 -type f -name 'process-industry-ai-*.tar.gz' -print)
+          [[ ${#archives[@]} -eq 1 ]] || { echo "Expected exactly one downloaded release archive" >&2; exit 1; }
+          archive="${archives[0]#./}"
+          [[ "$archive" =~ ^process-industry-ai-[0-9]{8}-[0-9]{6}\.tar\.gz$ ]] || { echo "Invalid archive name" >&2; exit 1; }
+          [[ -f "$archive.sha256" ]] || { echo "Missing downloaded checksum" >&2; exit 1; }
+          sha256sum -c "$archive.sha256"
+          release_id="${GITHUB_SHA:0:12}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          remote_dir="${STAGING_UPLOAD_DIR%/}/$release_id"
+          echo "archive=$archive" >> "$GITHUB_OUTPUT"
+          echo "package_root=${archive%.tar.gz}" >> "$GITHUB_OUTPUT"
+          echo "release_id=$release_id" >> "$GITHUB_OUTPUT"
+          echo "remote_dir=$remote_dir" >> "$GITHUB_OUTPUT"
+
+      - name: Configure SSH
+        id: ssh_config
+        shell: bash
+        env:
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.STAGING_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          for name in SSH_KEY SSH_KNOWN_HOSTS; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "Missing staging secret: $name" >&2
+              exit 1
+            fi
+          done
+          install -d -m 0700 "$HOME/.ssh"
+          printf '%s\n' "$SSH_KEY" > "$HOME/.ssh/staging_key"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 0600 "$HOME/.ssh/staging_key" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/staging_key" >/dev/null
+          ssh-keygen -F "[$STAGING_HOST]:$STAGING_PORT" -f "$HOME/.ssh/known_hosts" >/dev/null || {
+            echo "STAGING_KNOWN_HOSTS does not contain [$STAGING_HOST]:$STAGING_PORT" >&2
+            exit 1
+          }
+
+      - name: Upload release
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh_options=(
+            -i "$HOME/.ssh/staging_key"
+            -p "$STAGING_PORT"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts"
+          )
+          remote_dir="${{ steps.metadata.outputs.remote_dir }}"
+          archive="$GITHUB_WORKSPACE/release-artifact/${{ steps.metadata.outputs.archive }}"
+          ssh "${ssh_options[@]}" "$STAGING_USER@$STAGING_HOST" "mkdir -p '$remote_dir' && chmod 0700 '$remote_dir'"
+          scp_options=(
+            -i "$HOME/.ssh/staging_key"
+            -P "$STAGING_PORT"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts"
+          )
+          scp "${scp_options[@]}" "$archive" "$archive.sha256" "$STAGING_USER@$STAGING_HOST:$remote_dir/"
+
+      - name: Deploy frontend and backend
+        id: remote_deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh_options=(
+            -i "$HOME/.ssh/staging_key"
+            -p "$STAGING_PORT"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts"
+          )
+          ssh "${ssh_options[@]}" "$STAGING_USER@$STAGING_HOST" bash -s -- \
+            "${{ steps.metadata.outputs.remote_dir }}" \
+            "${{ steps.metadata.outputs.archive }}" \
+            "${{ steps.metadata.outputs.package_root }}" \
+            "${{ steps.metadata.outputs.release_id }}" <<'REMOTE'
+          set -euo pipefail
+          remote_dir="$1"
+          archive="$2"
+          package_root="$3"
+          release_id="$4"
+          cd "$remote_dir"
+          sha256sum -c "$archive.sha256"
+          tar -tzf "$archive" > archive-contents.txt
+          if grep -Eq '(^/|(^|/)\.\.(/|$))' archive-contents.txt; then
+            echo "Unsafe path found in release archive" >&2
+            exit 1
+          fi
+          unexpected_paths="$(grep -Ev "^${package_root}(/|$)" archive-contents.txt || true)"
+          if [[ -n "$unexpected_paths" ]]; then
+            echo "Unexpected archive root" >&2
+            exit 1
+          fi
+          tar -xzf "$archive"
+          cd "$package_root"
+          DEPLOY_LOCK_MODE=flock bash server/deploy.sh \
+            --app-root /opt/zlinfot-ai \
+            --release-id "$release_id" \
+            --static-only
+          # Deploy backend (requires sudo on the target)
+          sudo bash server/backend-deploy.sh \
+            --app-root /opt/zlinfot-ai \
+            --release-id "$release_id"
+          REMOTE
+
+      - name: Verify public HTTP
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="$(mktemp)"
+          trap 'rm -f "$body"' EXIT
+          status=""
+          for attempt in {1..10}; do
+            status="$(curl --silent --show-error --location --output "$body" --write-out '%{http_code}' \
+              --connect-timeout 3 --max-time 10 "$STAGING_URL" || true)"
+            if [[ "$status" == "200" ]] && grep -Fq '流程工业 AI 与智能体' "$body"; then
+              break
+            fi
+            sleep 2
+          done
+          [[ "$status" == "200" ]] || { echo "Public home page returned ${status:-connection failure}" >&2; exit 1; }
+          grep -Fq '流程工业 AI 与智能体' "$body" || { echo "Public home page content check failed" >&2; exit 1; }
+          asset="$(grep -Eo '(src|href)="/[^"]+\.(js|css)"' "$body" | head -n 1 | sed -E 's/^[^=]+="([^"]+)"$/\1/' || true)"
+          [[ -n "$asset" ]] || { echo "Public home page has no local JS/CSS asset" >&2; exit 1; }
+          base="${STAGING_URL%/}"
+          asset_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+            --connect-timeout 3 --max-time 10 "$base$asset" || true)"
+          [[ "$asset_status" == "200" ]] || { echo "Public asset returned ${asset_status:-connection failure}" >&2; exit 1; }
+          # Verify backend health through Nginx proxy
+          backend_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+            --connect-timeout 3 --max-time 10 "${base}/api/articles" || true)"
+          [[ "$backend_status" == "200" ]] || { echo "Backend API returned ${backend_status:-connection failure}" >&2; exit 1; }
+
+      - name: Recover a failed release
+        if: failure() && steps.ssh_config.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh_options=(
+            -i "$HOME/.ssh/staging_key"
+            -p "$STAGING_PORT"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts"
+          )
+          ssh "${ssh_options[@]}" "$STAGING_USER@$STAGING_HOST" bash -s -- \
+            "${{ steps.metadata.outputs.remote_dir }}" \
+            "${{ steps.metadata.outputs.package_root }}" \
+            "${{ steps.metadata.outputs.release_id }}" <<'REMOTE'
+          set -euo pipefail
+          remote_dir="$1"
+          package_root="$2"
+          release_id="$3"
+          current_target="$(readlink /opt/zlinfot-ai/current 2>/dev/null || true)"
+          if [[ "$current_target" != "releases/$release_id" ]]; then
+            echo "Failed release is not current; no recovery switch is needed."
+            exit 0
+          fi
+          rollback_script="$remote_dir/$package_root/server/rollback.sh"
+          [[ -f "$rollback_script" ]] || { echo "Rollback script is unavailable" >&2; exit 1; }
+          DEPLOY_LOCK_MODE=flock bash "$rollback_script" --app-root /opt/zlinfot-ai --static-only
+          sudo bash "$remote_dir/$package_root/server/backend-rollback.sh" --app-root /opt/zlinfot-ai
+          REMOTE
+
+      - name: Remove remote upload
+        if: always() && steps.ssh_config.outcome == 'success' && steps.metadata.outputs.remote_dir != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh_options=(
+            -i "$HOME/.ssh/staging_key"
+            -p "$STAGING_PORT"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=yes
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts"
+          )
+          ssh "${ssh_options[@]}" "$STAGING_USER@$STAGING_HOST" \
+            "rm -rf '${{ steps.metadata.outputs.remote_dir }}'"
+
+      - name: Remove SSH material
+        if: always()
+        shell: bash
+        run: rm -f "$HOME/.ssh/staging_key" "$HOME/.ssh/known_hosts"
