@@ -8,9 +8,11 @@
     "dev": "python3 ../scripts/build-content.py && vite"
   },
   "dependencies": {
+    "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "latest",
     "react": "latest",
     "react-dom": "latest",
+    "react-router-dom": "^7.18.1",
     "typescript": "latest",
     "vite": "latest"
   },

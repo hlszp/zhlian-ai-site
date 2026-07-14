@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 const graphNodes = [
   { id: "objects", label: "工厂对象", note: "装置 · 设备 · 仪表", className: "node-objects" },
   { id: "data", label: "实时数据", note: "时序 · 报警 · 事件", className: "node-data" },
@@ -18,7 +16,6 @@ export default function Hero({ activeNode, setActiveNode }: HeroProps) {
   const handleNodeClick = (id: string) => {
     setActiveNode(id);
   };
-
   return (
     <section className="hero" id="top">
       <div className="grid-overlay" aria-hidden="true" />

@@ -1,0 +1,20 @@
+[Unit]
+Description=Zhilian AI Portal Backend
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=zlai-backend
+Group=zlai-backend
+WorkingDirectory=/opt/zlinfot-ai/backend/current
+Environment=PYTHONPATH=/opt/zlinfot-ai/backend/current
+Environment=ENVIRONMENT=production
+EnvironmentFile=/opt/zlinfot-ai/backend/.env
+ExecStart=/opt/zlinfot-ai/backend/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+ExecStartPre=/opt/zlinfot-ai/backend/venv/bin/alembic upgrade head
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
