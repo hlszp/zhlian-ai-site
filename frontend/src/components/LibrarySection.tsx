@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, type KeyboardEvent } from "react";
 import type { Article } from "../types";
 
 interface LibrarySectionProps {
@@ -49,6 +49,20 @@ export default function LibrarySection({ articles }: LibrarySectionProps) {
     return counts;
   }, [articles]);
 
+  const selectTabFromKeyboard = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    let nextIndex = index;
+    if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+    else if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+    else if (event.key === "Home") nextIndex = 0;
+    else if (event.key === "End") nextIndex = tabs.length - 1;
+    else return;
+
+    event.preventDefault();
+    const nextLabel = kindMap[tabs[nextIndex]];
+    setLibraryTab(nextLabel);
+    document.getElementById(`library-tab-${tabs[nextIndex]}`)?.focus();
+  };
+
   return (
     <section className="library-section light-section" id="library">
       <div className="section-head">
@@ -60,15 +74,19 @@ export default function LibrarySection({ articles }: LibrarySectionProps) {
       </div>
       <div className="library-toolbar">
         <div className="library-tabs" role="tablist" aria-label="知识库分类">
-          {tabs.map((tab) => {
+          {tabs.map((tab, index) => {
             const label = kindMap[tab];
             return (
               <button
                 key={label}
                 role="tab"
                 aria-selected={libraryTab === label}
+                aria-controls="library-panel"
+                id={`library-tab-${tab}`}
+                tabIndex={libraryTab === label ? 0 : -1}
                 className={libraryTab === label ? "active" : ""}
                 onClick={() => setLibraryTab(label)}
+                onKeyDown={(event) => selectTabFromKeyboard(event, index)}
               >
                 <span>{label}</span>
                 <small>{countByTab[label]}</small>
@@ -86,12 +104,17 @@ export default function LibrarySection({ articles }: LibrarySectionProps) {
           />
         </label>
       </div>
-      <div className="library-summary">
+      <div className="library-summary" aria-live="polite" aria-atomic="true">
         <b>{libraryTab}</b>
         <span>{shownLibraryItems.length} 条精选内容</span>
         <em>来源优先级：标准组织 / 原始论文 / 官方仓库 / 厂商资料</em>
       </div>
-      <div className="library-grid">
+      <div
+        className="library-grid"
+        id="library-panel"
+        role="tabpanel"
+        aria-labelledby={`library-tab-${tabs.find((tab) => kindMap[tab] === libraryTab) ?? "case"}`}
+      >
         {shownLibraryItems.map((item, index) => (
           <a
             key={`${item.kind}-${item.title}`}

@@ -19,18 +19,20 @@ function HomePortal() {
   const [activeNode, setActiveNode] = useState("agent");
 
   return (
-    <main>
+    <>
       <Header />
-      <Hero activeNode={activeNode} setActiveNode={setActiveNode} />
-      <KnowledgeMap />
-      <IndustryGrid articles={data.articles} setActiveNode={setActiveNode} />
-      <StackSection />
-      <RadarSection />
-      <LibrarySection articles={data.articles} />
-      <ResourcesSection articles={data.articles} />
-      <PracticeSection />
+      <main className="portal-main">
+        <Hero activeNode={activeNode} setActiveNode={setActiveNode} />
+        <KnowledgeMap />
+        <IndustryGrid articles={data.articles} setActiveNode={setActiveNode} />
+        <StackSection />
+        <RadarSection />
+        <LibrarySection articles={data.articles} />
+        <ResourcesSection articles={data.articles} />
+        <PracticeSection />
+      </main>
       <Footer />
-    </main>
+    </>
   );
 }
 

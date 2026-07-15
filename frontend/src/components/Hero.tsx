@@ -49,7 +49,13 @@ export default function Hero({ activeNode, setActiveNode }: HeroProps) {
         </div>
       </div>
 
-      <div className="graph-shell" aria-label="工业智能体知识网络">
+      <div
+        className="graph-shell"
+        id="knowledge-network"
+        role="region"
+        aria-label="工业智能体知识网络"
+        tabIndex={-1}
+      >
         <div className="graph-title">
           <span>KNOWLEDGE NETWORK</span>
           <b>工业认知关系图</b>
@@ -65,6 +71,8 @@ export default function Hero({ activeNode, setActiveNode }: HeroProps) {
           <button
             className={`core-node ${activeNode === "agent" ? "active" : ""}`}
             onClick={() => handleNodeClick("agent")}
+            aria-pressed={activeNode === "agent"}
+            aria-label="工业智能体：感知、推理、执行"
           >
             <span className="agent-glyph" aria-hidden="true">
               AI
@@ -77,6 +85,8 @@ export default function Hero({ activeNode, setActiveNode }: HeroProps) {
               key={node.id}
               className={`graph-node ${node.className} ${activeNode === node.id ? "active" : ""}`}
               onClick={() => handleNodeClick(node.id)}
+              aria-pressed={activeNode === node.id}
+              aria-label={`${node.label}：${node.note}`}
             >
               <b>{node.label}</b>
               <small>{node.note}</small>

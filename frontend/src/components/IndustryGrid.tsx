@@ -97,6 +97,15 @@ export default function IndustryGrid({ articles, setActiveNode }: IndustryGridPr
     return cards;
   }, [articles]);
 
+  const showKnowledgeChain = () => {
+    setActiveNode?.("knowledge");
+    const network = document.querySelector<HTMLElement>("#knowledge-network");
+    if (!network) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    network.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
+    network.focus({ preventScroll: true });
+  };
+
   return (
     <section className="industries-section dark-section" id="industries">
       <div className="section-head dark">
@@ -112,6 +121,7 @@ export default function IndustryGrid({ articles, setActiveNode }: IndustryGridPr
             key={item}
             className={industryFilter === item ? "active" : ""}
             onClick={() => setIndustryFilter(item)}
+            aria-pressed={industryFilter === item}
           >
             {item}
           </button>
@@ -135,7 +145,9 @@ export default function IndustryGrid({ articles, setActiveNode }: IndustryGridPr
                   <b key={tag}>{tag}</b>
                 ))}
               </div>
-              <button onClick={() => setActiveNode?.("knowledge")}>查看能力链 →</button>
+              <button onClick={showKnowledgeChain} aria-label={`查看${card.industry}场景的知识能力链`}>
+                查看能力链 →
+              </button>
             </article>
           ))}
       </div>

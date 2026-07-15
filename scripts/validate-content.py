@@ -145,8 +145,35 @@ def main() -> int:
         return 1
 
     errors = []
-    for path in sorted(ARTICLES_DIR.rglob("*.md")):
+    ids: dict[str, Path] = {}
+    source_summaries: dict[tuple[str, str], Path] = {}
+    article_paths = sorted(ARTICLES_DIR.rglob("*.md"))
+    for path in article_paths:
         errors.extend(validate_article(path, categories, tags))
+        try:
+            fm = parse_frontmatter(path)
+        except Exception:
+            continue
+        if not isinstance(fm, dict):
+            continue
+
+        article_id = fm.get("id")
+        if isinstance(article_id, str):
+            if article_id in ids:
+                errors.append(f"{path}: duplicate id {article_id!r}; first used by {ids[article_id]}")
+            else:
+                ids[article_id] = path
+
+        source_url = fm.get("source_url")
+        summary = fm.get("summary")
+        if isinstance(source_url, str) and isinstance(summary, str):
+            key = (source_url.strip(), " ".join(summary.split()))
+            if key in source_summaries:
+                errors.append(
+                    f"{path}: duplicate source_url + summary; first used by {source_summaries[key]}"
+                )
+            else:
+                source_summaries[key] = path
 
     if errors:
         print("Validation failed:", file=sys.stderr)
@@ -154,7 +181,7 @@ def main() -> int:
             print(f"  - {e}", file=sys.stderr)
         return 1
 
-    count = len(list(ARTICLES_DIR.rglob("*.md")))
+    count = len(article_paths)
     print(f"Validation passed: {count} articles")
     return 0
 

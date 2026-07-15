@@ -13,7 +13,7 @@ const statusLabels: Record<Article["status"], string> = {
 export default function ArticleList() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("&quot;");
+  const [error, setError] = useState("");
   const [filters, setFilters] = useState({ status: "", kind: "", industry: "", q: "" });
 
   const load = async () => {
@@ -72,6 +72,7 @@ export default function ArticleList() {
 
       <div className="admin-filters">
         <select
+          aria-label="按文章状态筛选"
           value={filters.status}
           onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value }))}
         >
@@ -83,6 +84,7 @@ export default function ArticleList() {
         </select>
 
         <select
+          aria-label="按文章类型筛选"
           value={filters.kind}
           onChange={(e) => setFilters((f) => ({ ...f, kind: e.target.value }))}
         >
@@ -95,6 +97,7 @@ export default function ArticleList() {
         </select>
 
         <select
+          aria-label="按行业筛选"
           value={filters.industry}
           onChange={(e) => setFilters((f) => ({ ...f, industry: e.target.value }))}
         >
@@ -111,6 +114,7 @@ export default function ArticleList() {
 
         <input
           type="text"
+          aria-label="按标题搜索文章"
           placeholder="搜索标题..."
           value={filters.q}
           onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
@@ -119,12 +123,16 @@ export default function ArticleList() {
         <button onClick={load} className="admin-button">搜索</button>
       </div>
 
-      {error && <div className="admin-error">{error}</div>}
+      {error && <div className="admin-error" role="alert">{error}</div>}
 
       {loading ? (
-        <div className="admin-loading">加载中...</div>
+        <div className="admin-loading" role="status" aria-live="polite">加载中...</div>
       ) : (
-        <table className="admin-table">
+        <div>
+          <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+            共 {articles.length} 篇文章
+          </span>
+          <table className="admin-table">
           <thead>
             <tr>
               <th>标题</th>
@@ -178,7 +186,8 @@ export default function ArticleList() {
               </tr>
             ))}
           </tbody>
-        </table>
+          </table>
+        </div>
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-07-14T00:07:19Z",
+    "generated_at": "2026-07-15T06:38:46Z",
     "version": "1.0.0"
   },
   "categories": [
@@ -413,7 +413,7 @@
       "industry": "agrochemical",
       "status": "published",
       "summary": "利用 DCS 时序、操作事件和规则自动推断批次、工序与步序，为轻量批次分析补齐时间语义。",
-      "source_url": "https://www.isa.org/standards-and-publications/isa-standards/isa-88-standard",
+      "source_url": "https://www.isa.org/standards-and-publications/isa-standards/isa-88-standards",
       "source_title": "ISA-88 Batch Control Standard",
       "source_org": "ISA",
       "source_type": "standard",
@@ -596,7 +596,7 @@
       "industry": "general",
       "status": "published",
       "summary": "定义批控制的过程模型、物理模型和程序控制模型，适用于医药与精细化工批次语义建设。",
-      "source_url": "https://www.isa.org/standards-and-publications/isa-standards/isa-88-standard",
+      "source_url": "https://www.isa.org/standards-and-publications/isa-standards/isa-88-standards",
       "source_title": "ISA-88 Batch Control Standard",
       "source_org": "ISA",
       "source_type": "standard",
@@ -611,7 +611,7 @@
       "reviewed_by": "致联工业 AI 研究",
       "reviewed_at": "2026-07-13T00:00:00Z",
       "created_at": "2026-07-13T00:00:00Z",
-      "updated_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-15T00:00:00Z",
       "body": "定义批控制的过程模型、物理模型和程序控制模型，适用于医药与精细化工批次语义建设。"
     },
     {
@@ -778,39 +778,13 @@
       "body": "面向工业控制系统异常与网络攻击研究的硬件在环数据集。"
     },
     {
-      "id": "hai-dataset",
-      "title": "HAI Dataset",
-      "kind": "open-source",
-      "industry": "general",
-      "status": "published",
-      "summary": "用于工业控制系统异常与网络攻击研究的硬件在环数据集，并附带相关研究线索。",
-      "source_url": "https://github.com/icsdataset/hai",
-      "source_title": "HAI Security Dataset",
-      "source_org": "ICS Dataset",
-      "source_type": "repo",
-      "tags": [
-        "anomaly-detection",
-        "industrial-ai",
-        "ai-governance"
-      ],
-      "categories": [
-        "process-monitoring",
-        "agentic-systems"
-      ],
-      "reviewed_by": "致联工业 AI 研究",
-      "reviewed_at": "2026-07-13T00:00:00Z",
-      "created_at": "2026-07-13T00:00:00Z",
-      "updated_at": "2026-07-13T00:00:00Z",
-      "body": "面向工业控制系统异常与网络攻击研究的硬件在环数据集。"
-    },
-    {
       "id": "control-loop-diagnostic-agent",
       "title": "控制回路诊断智能体",
       "kind": "case",
       "industry": "chemical",
       "status": "published",
       "summary": "从回路筛选、指标计算、振荡与粘滞诊断，到原因解释和整定建议的完整智能体能力链。",
-      "source_url": "https://www.isa.org/intech-home/2021/june-2021/features/control-loop-performance-monitoring",
+      "source_url": "https://www.isa.org/intech-home/2020/may-june/features/analytics-is-changing-our-understanding-of-regulat",
       "source_title": "Control Loop Performance Monitoring",
       "source_org": "ISA",
       "source_type": "paper",
@@ -826,7 +800,7 @@
       "reviewed_by": "致联工业 AI 研究",
       "reviewed_at": "2026-07-13T00:00:00Z",
       "created_at": "2026-07-13T00:00:00Z",
-      "updated_at": "2026-07-13T00:00:00Z",
+      "updated_at": "2026-07-15T00:00:00Z",
       "body": "融合 PID 性能指标、振荡检测、阀门粘滞诊断与机理解释，生成可追溯的处置建议。"
     },
     {
@@ -890,7 +864,7 @@
       "industry": "pharma",
       "status": "published",
       "summary": "沿 S88 批次层级自动核查关键步骤、偏差与电子记录，保留证据链和审批边界。",
-      "source_url": "https://www.isa.org/standards-and-publications/isa-standards/isa-88-standard",
+      "source_url": "https://www.isa.org/standards-and-publications/isa-standards/isa-88-standards",
       "source_title": "ISA-88 Batch Control Standard",
       "source_org": "ISA",
       "source_type": "standard",
@@ -917,7 +891,7 @@
       "industry": "pharma",
       "status": "published",
       "summary": "围绕批次、工序、步序和关键参数自动核查偏差，输出证据定位与风险分级，保留人工批准。",
-      "source_url": "https://www.isa.org/standards-and-publications/isa-standards/isa-88-standard",
+      "source_url": "https://www.isa.org/standards-and-publications/isa-standards/isa-88-standards",
       "source_title": "ISA-88 Batch Control Standard",
       "source_org": "ISA",
       "source_type": "standard",
@@ -944,7 +918,7 @@
       "industry": "agrochemical",
       "status": "published",
       "summary": "从 DCS 时序和操作事件中识别批次、工序与步序，为无 BATCH/MES 现场补齐轻量语义。",
-      "source_url": "https://www.isa.org/standards-and-publications/isa-standards/isa-88-standard",
+      "source_url": "https://www.isa.org/standards-and-publications/isa-standards/isa-88-standards",
       "source_title": "ISA-88 Batch Control Standard",
       "source_org": "ISA",
       "source_type": "standard",
