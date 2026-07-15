@@ -38,6 +38,15 @@ mkdir -p "$BACKEND_DIR/logs"
 mkdir -p "$BACKEND_DIR/systemd"
 
 BACKEND_RELEASE_DIR="$BACKEND_DIR/releases/$(basename "$RELEASE_DIR")"
+previous_current="$(readlink -f "$BACKEND_DIR/current" 2>/dev/null || true)"
+
+# Refuse to prepare or switch a release without operator-provisioned secrets.
+ENV_FILE="$BACKEND_DIR/.env"
+[[ -f "$ENV_FILE" ]] || {
+    echo "Missing production environment file: $ENV_FILE" >&2
+    echo "Provision DATABASE_URL, ENVIRONMENT=production, ADMIN_USERNAME and ADMIN_PASSWORD before deploying." >&2
+    exit 1
+}
 
 # Copy backend code into the release-specific backend directory
 rm -rf "$BACKEND_RELEASE_DIR"
@@ -50,20 +59,6 @@ if [[ ! -d "$VENV_DIR" ]]; then
 fi
 "$VENV_DIR/bin/pip" install -q -r "$BACKEND_RELEASE_DIR/requirements.txt"
 
-# Symlink current backend
-ln -sfn "$BACKEND_RELEASE_DIR" "$BACKEND_DIR/current"
-ln -sfn "$BACKEND_DIR/current" "$RELEASE_DIR/backend"
-
-# Environment file
-ENV_FILE="$BACKEND_DIR/.env"
-if [[ -f "$ENV_FILE" ]]; then
-    echo "Environment file already exists: $ENV_FILE"
-else
-    echo "DATABASE_URL=postgresql://zlai:zlai@localhost:5432/zlai" > "$ENV_FILE"
-    echo "ENVIRONMENT=production" >> "$ENV_FILE"
-    echo "Created default env file: $ENV_FILE"
-fi
-
 cp "$ENV_FILE" "$BACKEND_RELEASE_DIR/.env"
 
 # Run migrations (fail if DB unreachable)
@@ -71,6 +66,13 @@ cp "$ENV_FILE" "$BACKEND_RELEASE_DIR/.env"
     cd "$BACKEND_RELEASE_DIR"
     "$VENV_DIR/bin/alembic" upgrade head
 )
+
+# Preserve the old release for rollback, then atomically switch current.
+if [[ -n "$previous_current" && -d "$previous_current" ]]; then
+    ln -sfn "$previous_current" "$BACKEND_DIR/previous"
+fi
+ln -sfn "$BACKEND_RELEASE_DIR" "$BACKEND_DIR/current"
+ln -sfn "$BACKEND_DIR/current" "$RELEASE_DIR/backend"
 
 # Install / update systemd service
 if [[ -z "$SKIP_SYSTEMD" ]]; then
@@ -82,7 +84,7 @@ fi
 
 # Health check
 for i in {1..10}; do
-    if curl -fsS http://127.0.0.1:8000/health >/devdev/null; then
+    if curl -fsS http://127.0.0.1:8000/api/health >/dev/null; then
         echo "Backend health check OK"
         exit 0
     fi
@@ -90,4 +92,11 @@ for i in {1..10}; do
 done
 
 echo "Backend health check failed" >&2
+if [[ -n "$previous_current" && -d "$previous_current" ]]; then
+    ln -sfn "$previous_current" "$BACKEND_DIR/current"
+    if [[ -z "$SKIP_SYSTEMD" ]]; then
+        systemctl restart "$SERVICE_NAME"
+    fi
+    echo "Restored previous backend release after failed health check" >&2
+fi
 exit 1

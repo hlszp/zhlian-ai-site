@@ -1,8 +1,6 @@
 name: Deploy staging
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -33,7 +31,7 @@ jobs:
       - name: Install backend dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt pytest httpx
+          pip install -r requirements-dev.txt
         working-directory: backend
 
       - name: Run backend tests
@@ -54,7 +52,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          bash scripts/package.sh
+          INCLUDE_BACKEND=1 bash scripts/package.sh
           mapfile -t archives < <(find . -maxdepth 1 -type f -name 'process-industry-ai-*.tar.gz' -print)
           [[ ${#archives[@]} -eq 1 ]] || { echo "Expected exactly one release archive" >&2; exit 1; }
           archive="${archives[0]#./}"
@@ -104,7 +102,10 @@ jobs:
           (( STAGING_PORT <= 65535 )) || { echo "Invalid STAGING_PORT" >&2; exit 1; }
           [[ "$STAGING_USER" =~ ^[a-z_][a-z0-9_-]*$ ]] || { echo "Invalid STAGING_USER" >&2; exit 1; }
           [[ "$STAGING_HOST" =~ ^[A-Za-z0-9.-]+$ ]] || { echo "Invalid STAGING_HOST" >&2; exit 1; }
-          [[ "$STAGING_URL" =~ ^https?://[^[:space:]]+$ ]] || { echo "Invalid STAGING_URL" >&2; exit 1; }
+          [[ "$STAGING_URL" =~ ^https://[^[:space:]]+$ ]] || {
+            echo "STAGING_URL must use HTTPS before Basic Auth staging can be deployed" >&2
+            exit 1
+          }
           [[ "$STAGING_UPLOAD_DIR" =~ ^/[A-Za-z0-9._/-]+$ ]] || { echo "Invalid STAGING_UPLOAD_DIR" >&2; exit 1; }
           [[ ! "$STAGING_UPLOAD_DIR" =~ (^|/)\.\.(/|$) ]] || { echo "Invalid STAGING_UPLOAD_DIR" >&2; exit 1; }
           cd "$GITHUB_WORKSPACE/release-artifact"
@@ -217,7 +218,7 @@ jobs:
             --release-id "$release_id"
           REMOTE
 
-      - name: Verify public HTTP
+      - name: Verify public HTTPS
         shell: bash
         run: |
           set -euo pipefail
@@ -240,9 +241,9 @@ jobs:
           asset_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
             --connect-timeout 3 --max-time 10 "$base$asset" || true)"
           [[ "$asset_status" == "200" ]] || { echo "Public asset returned ${asset_status:-connection failure}" >&2; exit 1; }
-          # Verify backend health through Nginx proxy
+          # Verify the public, unauthenticated backend health endpoint.
           backend_status="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
-            --connect-timeout 3 --max-time 10 "${base}/api/articles" || true)"
+            --connect-timeout 3 --max-time 10 "${base}/api/health" || true)"
           [[ "$backend_status" == "200" ]] || { echo "Backend API returned ${backend_status:-connection failure}" >&2; exit 1; }
 
       - name: Recover a failed release

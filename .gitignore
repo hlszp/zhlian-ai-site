@@ -13,3 +13,8 @@ site/
 .vscode/
 zhilianAI-guid.md
 IDEA.md
+.gstack/
+__pycache__/
+*.py[cod]
+*.db
+.pytest_cache/
