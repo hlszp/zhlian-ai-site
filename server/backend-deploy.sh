@@ -26,11 +26,13 @@ done
 
 SERVICE_NAME="zlai-backend.service"
 SERVICE_FILE="$RELEASE_DIR/server/systemd/$SERVICE_NAME"
+ENV_RUNNER="$RELEASE_DIR/server/run-with-environment-file.py"
 
 if [[ -z "$SKIP_SYSTEMD" && ! -f "$SERVICE_FILE" ]]; then
     echo "Missing systemd service file: $SERVICE_FILE" >&2
     exit 1
 fi
+[[ -f "$ENV_RUNNER" ]] || { echo "Missing environment runner: $ENV_RUNNER" >&2; exit 1; }
 
 # Ensure directory layout
 mkdir -p "$BACKEND_DIR/releases"
@@ -64,7 +66,7 @@ cp "$ENV_FILE" "$BACKEND_RELEASE_DIR/.env"
 # Run migrations (fail if DB unreachable)
 (
     cd "$BACKEND_RELEASE_DIR"
-    "$VENV_DIR/bin/alembic" upgrade head
+    "$VENV_DIR/bin/python" "$ENV_RUNNER" "$ENV_FILE" "$VENV_DIR/bin/alembic" upgrade head
 )
 
 # Preserve the old release for rollback, then atomically switch current.

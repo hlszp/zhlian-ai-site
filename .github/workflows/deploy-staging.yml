@@ -42,6 +42,7 @@ jobs:
         run: |
           npm ci
           npm run build
+          git diff --exit-code -- public/site-data.json
         working-directory: frontend
 
       - name: Test deployment scripts

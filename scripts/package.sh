@@ -12,7 +12,18 @@ npm run build --prefix frontend
 
 INCLUDE_BACKEND="${INCLUDE_BACKEND:-0}"
 if [[ "$INCLUDE_BACKEND" == "1" ]]; then
-  ( cd backend && python3 -c "import app.main" )
+  BACKEND_PYTHON="${BACKEND_PYTHON:-}"
+  if [[ -z "$BACKEND_PYTHON" ]]; then
+    if [[ -x backend/.venv/bin/python ]]; then
+      BACKEND_PYTHON="$ROOT/backend/.venv/bin/python"
+    else
+      BACKEND_PYTHON="$(command -v python3)"
+    fi
+  elif [[ "$BACKEND_PYTHON" != /* ]]; then
+    BACKEND_PYTHON="$ROOT/$BACKEND_PYTHON"
+  fi
+  [[ -x "$BACKEND_PYTHON" ]] || { echo "错误：BACKEND_PYTHON 不可执行。" >&2; exit 1; }
+  ( cd backend && "$BACKEND_PYTHON" -c "import app.main" )
 fi
 
 cd "$ROOT"
@@ -43,7 +54,11 @@ cp -a \
 
 if [[ "$INCLUDE_BACKEND" == "1" ]]; then
   mkdir -p "$STAGING/$RELEASE_NAME/backend" "$STAGING/$RELEASE_NAME/server/systemd"
-  cp -a server/backend-deploy.sh server/backend-rollback.sh "$STAGING/$RELEASE_NAME/server/"
+  cp -a \
+    server/backend-deploy.sh \
+    server/backend-rollback.sh \
+    server/run-with-environment-file.py \
+    "$STAGING/$RELEASE_NAME/server/"
   cp server/systemd/zlai-backend.service "$STAGING/$RELEASE_NAME/server/systemd/"
 
   # Backend code (excluding virtualenvs, caches, tests and local databases)

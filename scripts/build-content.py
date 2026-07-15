@@ -2,7 +2,7 @@
 """Build site-data.json from content/."""
 import json
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import datetime
 
 
 def normalize_value(value):
@@ -71,10 +71,16 @@ def main() -> None:
 
     published = [a for a in articles if a.get("status") == "published"]
     drafts = [a for a in articles if a.get("status") != "published"]
+    content_updated_at = max(
+        (str(a.get("updated_at") or a.get("created_at") or "") for a in articles),
+        default="",
+    )
 
     data = {
         "meta": {
-            "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+            # Keep tracked output reproducible: this represents the newest source
+            # content timestamp, not the wall-clock time of a local build.
+            "generated_at": content_updated_at,
             "version": "1.0.0",
         },
         "categories": categories,
