@@ -1,38 +1,51 @@
 # 致联信息｜流程工业 AI 与智能体网站
 
-本仓库是 `https://ai.zlinfot.com` 的唯一源代码仓库。网站采用 React、TypeScript 和 Vite 构建为静态文件，并由 Nginx 托管。
+本仓库是 `http://ai.zlinfot.com` 的唯一源代码仓库。网站采用 React、TypeScript 和 Vite 构建为静态文件，并由 Nginx 托管。
 
 ## 项目小结
 
-这是 ZHILIAN 的流程工业 AI 与智能体知识网站。当前版本以一个轻量、可持续扩展的静态站点为目标：用案例、方法、论文和工具信息帮助读者理解流程工业中的 AI 应用，暂不承担登录、在线推理、交易或后台管理职能。
+这是 ZHILIAN 的流程工业 AI 与智能体知识网站。公网生产环境当前仍是轻量、可持续扩展的静态站点：用案例、方法、标准和开源工具帮助读者理解流程工业中的 AI 应用，不提供登录、在线推理或交易功能。
 
-当前内容仍集中在 `src/App.tsx`，`src/styles.css` 负责视觉样式；`content/` 已预留为下一阶段的内容数据目录。后续增加知识和案例时，应优先保持内容结构清晰、来源可追溯，并避免把未经核验的宣传性结论写入页面。
+站点内容以 `content/` 下经过校验的 Markdown/JSON 为源，`scripts/build-content.py` 生成 `frontend/public/site-data.json`，React 组件负责展示。`backend/` 和 `/admin` 是正在建设的 Phase 2 内容管理能力；已具备基础 API、鉴权和测试，但在 HTTPS、生产数据库、系统用户与回滚方案完成前不得接入生产流量。
 
 仓库中的 `zhilianAI-guid.md` 是项目工作指引，不参与构建和部署，也不应被提交进发布包。
 
 ## 本地开发与验证
 
 ```bash
+cd frontend
 npm ci
 npm run dev
+```
+
+内容与后端验证：
+
+```bash
+python3 scripts/validate-content.py
+cd backend
+python3 -m venv .venv
+.venv/bin/pip install -r requirements-dev.txt
+DATABASE_URL=sqlite:///./test.db .venv/bin/python -m pytest -q
 ```
 
 发布前至少执行：
 
 ```bash
-npm ci
-npm run build
+npm --prefix frontend ci
+npm --prefix frontend run build
+python3 scripts/validate-content.py
+bash tests/deploy-scripts.sh
 bash scripts/package.sh
 ```
 
-`package.sh` 会重新构建网站，并生成：
+`package.sh` 默认只打包静态生产站点，并生成：
 
 ```text
 process-industry-ai-<UTC时间>.tar.gz
 process-industry-ai-<UTC时间>.tar.gz.sha256
 ```
 
-压缩包仅包含构建后的 `site/`、服务器部署脚本、Nginx 配置和发布元数据，不包含源代码、依赖、密钥或本地缓存。macOS 和 Linux 分别使用 `shasum` 或 `sha256sum` 生成 SHA-256。
+压缩包仅包含构建后的 `site/`、静态部署脚本、Nginx 配置和发布元数据，不包含源代码、依赖、密钥或本地缓存。只有手动验证 Phase 2 staging 时才使用 `INCLUDE_BACKEND=1 bash scripts/package.sh`；该模式优先使用 `backend/.venv/bin/python` 做后端导入检查，也可用 `BACKEND_PYTHON=/path/to/python` 显式指定已安装依赖的 Python。该模式不用于当前生产发布。macOS 和 Linux 分别使用 `shasum` 或 `sha256sum` 生成 SHA-256。
 
 ## 部署架构
 
@@ -47,7 +60,7 @@ process-industry-ai-<UTC时间>.tar.gz.sha256
     └── nginx-backups/
 ```
 
-Nginx 的站点根目录固定指向 `/opt/zlinfot-ai/current`。每次部署创建新 release，通过软链接切换版本；健康检查失败时自动恢复原链接。
+Nginx 的站点根目录固定指向 `/opt/zlinfot-ai/current/site`。每次部署创建新 release，通过软链接切换版本；健康检查失败时自动恢复原链接。
 
 普通内容发布不需要 reload Nginx。`zhilian-deploy` 只需拥有 `/opt/zlinfot-ai` 和 `/var/tmp/zhilian-deploy`，通过 `--static-only` 创建 release 并原子切换软链接。部署与回滚优先共用 `/opt/zlinfot-ai/.deploy.lock` 的 `flock` 文件锁，进程异常退出时由内核自动释放；缺少 `flock` 的本地环境回退为目录锁，避免两个任务同时改动版本指针。
 
@@ -161,17 +174,20 @@ sudo systemctl reload nginx
 
 ## GitHub Actions 自动部署
 
-项目有两条 GitHub Actions 工作流：
+项目有三条 GitHub Actions 工作流：
 
-- [`ci.yml`](.github/workflows/ci.yml)：在 Pull Request 和 `main` 推送时运行 `npm ci`、Vite 构建、部署脚本测试和发布包校验；它不读取生产密钥。
-- [`deploy.yml`](.github/workflows/deploy.yml)：在 `main` 推送或手动触发时运行生产发布。它先等待同一工作流的 `build` Job 成功，再把经过 SHA-256 校验的发布包传给独立的 `deploy` Job。
+- [`ci.yml`](.github/workflows/ci.yml)：在 Pull Request 和 `main` 推送时运行后端测试、前端构建、内容校验、部署脚本测试和静态发布包校验；它不读取生产密钥。
+- [`deploy-production.yml`](.github/workflows/deploy-production.yml)：在 `main` 推送或手动触发时发布静态生产站点。
+- [`deploy-staging.yml`](.github/workflows/deploy-staging.yml)：仅允许手动触发，用于 Phase 2 后台的受控 staging 验证，不会随 `main` 自动运行。
+
+`Deploy staging` 会强制 `STAGING_URL` 使用 `https://`；在 staging TLS 尚未准备好时，该工作流按设计不可执行，避免通过明文 HTTP 传输 Basic Auth 凭据。
 
 生产部署的具体链路如下：
 
-1. `build` Job 在无生产密钥的 Runner 上安装依赖、运行 `bash tests/deploy-scripts.sh`、执行 `scripts/package.sh`，并上传只包含静态文件、服务器脚本、Nginx 配置和 `RELEASE` 元数据的 Artifact。
+1. `build` Job 在无生产密钥的 Runner 上运行后端测试、前端构建和部署脚本测试，执行默认的 `scripts/package.sh`，并上传只包含静态文件、静态服务器脚本、Nginx 配置和 `RELEASE` 元数据的 Artifact。
 2. `deploy` Job 进入 GitHub `production` Environment，只下载并再次校验 Artifact，不 checkout 源代码，也不在密钥落盘后执行工作区脚本。
 3. 工作流使用固定的 SSH host key 和专用 `PROD_SSH_KEY`，将包上传到服务器的 `/var/tmp/zhilian-deploy/<release-id>`。
-4. 服务器再次校验 SHA-256 和 tar 路径，使用无 sudo 的 `zhilian-deploy` 执行 `server/deploy.sh --static-only`。部署通过 `flock` 串行化，创建新 release 后原子切换 `current`，不 reload Nginx。
+4. 服务器再次校验 SHA-256 和 tar 路径，使用无 sudo 的 `zhilian-deploy` 执行 `server/deploy.sh --static-only`。生产工作流不会部署后端、使用 sudo、修改 Nginx 或安装系统服务。部署通过 `flock` 串行化，创建新 release 后原子切换 `current`。
 5. Runner 通过 `PROD_URL` 检查首页文本和首个 JS/CSS 资源。公网检查失败时，工作流只在确认失败版本仍是 `current` 后执行静态回滚，并清理远程临时包和 Runner 上的 SSH 材料。
 
 自动部署的日常使用方式：

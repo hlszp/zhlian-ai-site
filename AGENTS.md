@@ -7,17 +7,20 @@
 ## Stack
 
 - React + TypeScript + Vite
+- Validated Markdown/JSON content pipeline
+- FastAPI + PostgreSQL Phase 2 backend (staging only)
 - Static production output
 - Nginx on Alibaba Cloud
 
 ## Required workflow
 
 1. Read `README.md` before changing deployment behavior.
-2. Keep source changes in `src/`; never edit generated `dist/` or `site/` files.
-3. Run `npm ci` and `npm run build` after code changes.
+2. Keep source changes in `frontend/src/`, `content/`, and `backend/`; never edit generated `dist/` or `site/` files.
+3. Run the relevant frontend build, content validation, and backend tests after code changes.
 4. Run `bash scripts/package.sh` before a release.
 5. Keep desktop and mobile layouts working.
 6. Preserve a rollback path for every deployment change.
+7. Keep production releases static-only until Phase 2 backend infrastructure and HTTPS are explicitly approved.
 
 ## Content rules
 
@@ -37,5 +40,6 @@
 
 - Host: configured outside the repository
 - OS: CentOS 7.9 currently; migration to Alibaba Cloud Linux 3 or Ubuntu LTS is recommended
-- Web root: `/var/www/ai.zlinfot.com`
+- Application root: `/opt/zlinfot-ai`
+- Active web root: `/opt/zlinfot-ai/current/site`
 - Nginx config: `/etc/nginx/conf.d/ai.zlinfot.com.conf`
