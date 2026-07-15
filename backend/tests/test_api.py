@@ -13,6 +13,7 @@ engine = create_engine(
     future=True,
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+ADMIN_AUTH = ("admin", "admin")
 
 
 def override_get_db():
@@ -55,7 +56,7 @@ def sample_article():
 
 
 def test_health(client):
-    r = client.get("/health")
+    r = client.get("/api/health")
     assert r.status_code == 200
     data = r.json()
     assert data["status"] == "ok"
@@ -64,7 +65,7 @@ def test_health(client):
 
 
 def test_create_article(client, sample_article):
-    r = client.post("/api/articles", json=sample_article)
+    r = client.post("/api/articles", json=sample_article, auth=ADMIN_AUTH)
     assert r.status_code == 201
     data = r.json()
     assert data["id"] == sample_article["id"]
@@ -72,27 +73,27 @@ def test_create_article(client, sample_article):
 
 
 def test_create_article_duplicate_id(client, sample_article):
-    client.post("/api/articles", json=sample_article)
-    r = client.post("/api/articles", json=sample_article)
+    client.post("/api/articles", json=sample_article, auth=ADMIN_AUTH)
+    r = client.post("/api/articles", json=sample_article, auth=ADMIN_AUTH)
     assert r.status_code == 409
 
 
 def test_get_article(client, sample_article):
-    client.post("/api/articles", json=sample_article)
-    r = client.get(f"/api/articles/{sample_article['id']}")
+    client.post("/api/articles", json=sample_article, auth=ADMIN_AUTH)
+    r = client.get(f"/api/articles/{sample_article['id']}", auth=ADMIN_AUTH)
     assert r.status_code == 200
     data = r.json()
     assert data["title"] == sample_article["title"]
 
 
 def test_get_article_not_found(client):
-    r = client.get("/api/articles/nonexistent")
+    r = client.get("/api/articles/nonexistent", auth=ADMIN_AUTH)
     assert r.status_code == 404
 
 
 def test_list_articles(client, sample_article):
-    client.post("/api/articles", json=sample_article)
-    r = client.get("/api/articles")
+    client.post("/api/articles", json=sample_article, auth=ADMIN_AUTH)
+    r = client.get("/api/articles", auth=ADMIN_AUTH)
     assert r.status_code == 200
     data = r.json()
     assert data["total"] == 1
@@ -100,57 +101,83 @@ def test_list_articles(client, sample_article):
 
 
 def test_list_articles_filter(client, sample_article):
-    client.post("/api/articles", json=sample_article)
-    r = client.get("/api/articles?status=draft")
+    client.post("/api/articles", json=sample_article, auth=ADMIN_AUTH)
+    r = client.get("/api/articles?status=draft", auth=ADMIN_AUTH)
     assert r.status_code == 200
     assert r.json()["total"] == 1
 
-    r = client.get("/api/articles?status=published")
+    r = client.get("/api/articles?status=published", auth=ADMIN_AUTH)
     assert r.status_code == 200
     assert r.json()["total"] == 0
 
 
 def test_list_articles_search(client, sample_article):
-    client.post("/api/articles", json=sample_article)
-    r = client.get("/api/articles?q=Test")
+    client.post("/api/articles", json=sample_article, auth=ADMIN_AUTH)
+    r = client.get("/api/articles?q=Test", auth=ADMIN_AUTH)
     assert r.status_code == 200
     assert r.json()["total"] == 1
 
-    r = client.get("/api/articles?q=nonexistent")
+    r = client.get("/api/articles?q=nonexistent", auth=ADMIN_AUTH)
     assert r.status_code == 200
     assert r.json()["total"] == 0
 
 
 def test_update_article(client, sample_article):
-    client.post("/api/articles", json=sample_article)
+    client.post("/api/articles", json=sample_article, auth=ADMIN_AUTH)
     updated = {**sample_article, "title": "Updated Title"}
-    r = client.put(f"/api/articles/{sample_article['id']}", json=updated)
+    r = client.put(f"/api/articles/{sample_article['id']}", json=updated, auth=ADMIN_AUTH)
     assert r.status_code == 200
     assert r.json()["title"] == "Updated Title"
 
 
 def test_update_article_status(client, sample_article):
-    client.post("/api/articles", json=sample_article)
-    r = client.patch(f"/api/articles/{sample_article['id']}/status", json={"status": "published"})
+    client.post("/api/articles", json=sample_article, auth=ADMIN_AUTH)
+    r = client.patch(
+        f"/api/articles/{sample_article['id']}/status",
+        json={"status": "published"},
+        auth=ADMIN_AUTH,
+    )
     assert r.status_code == 200
     assert r.json()["status"] == "published"
 
 
 def test_delete_article(client, sample_article):
-    client.post("/api/articles", json=sample_article)
-    r = client.delete(f"/api/articles/{sample_article['id']}")
+    client.post("/api/articles", json=sample_article, auth=ADMIN_AUTH)
+    r = client.delete(f"/api/articles/{sample_article['id']}", auth=ADMIN_AUTH)
     assert r.status_code == 204
-    r = client.get(f"/api/articles/{sample_article['id']}")
+    r = client.get(f"/api/articles/{sample_article['id']}", auth=ADMIN_AUTH)
     assert r.status_code == 404
 
 
 def test_categories_empty(client):
-    r = client.get("/api/categories")
+    r = client.get("/api/categories", auth=ADMIN_AUTH)
     assert r.status_code == 200
     assert r.json() == []
 
 
 def test_tags_empty(client):
-    r = client.get("/api/tags")
+    r = client.get("/api/tags", auth=ADMIN_AUTH)
     assert r.status_code == 200
     assert r.json() == []
+
+
+@pytest.mark.parametrize(
+    ("method", "path", "json"),
+    [
+        ("get", "/api/articles", None),
+        ("post", "/api/articles", {}),
+        ("get", "/api/categories", None),
+        ("post", "/api/categories", {}),
+        ("get", "/api/tags", None),
+        ("post", "/api/tags", {}),
+    ],
+)
+def test_management_api_requires_authentication(client, method, path, json):
+    response = client.request(method, path, json=json)
+    assert response.status_code == 401
+    assert response.headers["www-authenticate"] == "Basic"
+
+
+def test_management_api_rejects_invalid_credentials(client):
+    response = client.get("/api/articles", auth=("admin", "wrong-password"))
+    assert response.status_code == 401

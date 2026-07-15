@@ -23,12 +23,13 @@ if [[ -z "$current_target" || ! -d "$previous_target" ]]; then
 fi
 
 ln -sfn "$previous_target" "$BACKEND_DIR/current"
+ln -sfn "$current_target" "$BACKEND_DIR/previous"
 cp "$BACKEND_DIR/current/.env" "$BACKEND_DIR/.env" 2>/dev/null || true
 
 systemctl restart "$SERVICE_NAME"
 
 for i in {1..10}; do
-    if curl -fsS http://127.0.0.1:8000/health >/dev/null; then
+    if curl -fsS http://127.0.0.1:8000/api/health >/dev/null; then
         echo "Backend rollback health check OK"
         exit 0
     fi

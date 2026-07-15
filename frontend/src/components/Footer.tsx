@@ -16,9 +16,7 @@ export default function Footer() {
         <a href="#top">回到顶部 ↑</a>
       </div>
       <div className="footer-bottom">
-        <span>
-          © {new Date().getFullYear()} 致联工业 AI 研究 · 研究与实践门户
-        </span>
+        <span>ZHILIAN © {new Date().getFullYear()}</span>
       </div>
     </footer>
   );

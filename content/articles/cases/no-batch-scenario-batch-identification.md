@@ -5,7 +5,7 @@ kind: case
 industry: agrochemical
 status: published
 summary: 利用 DCS 时序、操作事件和规则自动推断批次、工序与步序，为轻量批次分析补齐时间语义。
-source_url: https://www.isa.org/standards-and-publications/isa-standards/isa-88-standard
+source_url: https://www.isa.org/standards-and-publications/isa-standards/isa-88-standards
 source_title: ISA-88 Batch Control Standard
 source_org: ISA
 source_type: standard

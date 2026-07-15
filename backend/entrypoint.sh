@@ -4,7 +4,7 @@ set -euo pipefail
 # Run Alembic migrations, then start uvicorn.
 # DATABASE_URL must be set by the environment.
 
-echo "DATABASE_URL=${DATABASE_URL:-unset}"
+[[ -n "${DATABASE_URL:-}" ]] || { echo "DATABASE_URL is required" >&2; exit 1; }
 
 alembic upgrade head
 

@@ -9,7 +9,7 @@ export default function AdminApp() {
     <div className="admin-layout">
       <aside className="admin-sidebar">
         <div className="admin-brand">致联 AI 管理后台</div>
-        <nav className="admin-nav">
+        <nav className="admin-nav" aria-label="管理后台导航">
           <NavLink to="/admin/articles" end className="admin-nav-link">
             文章列表
           </NavLink>

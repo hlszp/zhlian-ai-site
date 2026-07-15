@@ -35,6 +35,25 @@ printf '200'
 EOF
 chmod +x "$FAKE_BIN/curl"
 
+# Backend migrations must receive the operator-provisioned EnvironmentFile,
+# force production validation, and reject writable configuration files.
+BACKEND_ENV="$WORK_DIR/backend.env"
+cat > "$BACKEND_ENV" <<'EOF'
+DATABASE_URL=postgresql://app:strong-password@db/app
+ADMIN_USERNAME=editor
+ADMIN_PASSWORD='a strong production password'
+ENVIRONMENT=development
+EOF
+chmod 600 "$BACKEND_ENV"
+python3 "$REPO_ROOT/server/run-with-environment-file.py" "$BACKEND_ENV" python3 -c \
+  'import os; assert os.environ["DATABASE_URL"].startswith("postgresql://app:"); assert os.environ["ADMIN_PASSWORD"] == "a strong production password"; assert os.environ["ENVIRONMENT"] == "production"'
+chmod 666 "$BACKEND_ENV"
+if python3 "$REPO_ROOT/server/run-with-environment-file.py" "$BACKEND_ENV" python3 -c 'pass' >/dev/null 2>&1; then
+  echo "断言失败：环境执行器接受了可被其他用户写入的配置" >&2
+  exit 1
+fi
+chmod 600 "$BACKEND_ENV"
+
 assert_link() {
   local link_path="$1"
   local expected="$2"

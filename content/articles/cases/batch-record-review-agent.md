@@ -5,7 +5,7 @@ kind: case
 industry: pharma
 status: published
 summary: 沿 S88 批次层级自动核查关键步骤、偏差与电子记录，保留证据链和审批边界。
-source_url: https://www.isa.org/standards-and-publications/isa-standards/isa-88-standard
+source_url: https://www.isa.org/standards-and-publications/isa-standards/isa-88-standards
 source_title: ISA-88 Batch Control Standard
 source_org: ISA
 source_type: standard

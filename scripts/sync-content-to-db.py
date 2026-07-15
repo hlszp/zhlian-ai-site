@@ -11,11 +11,6 @@ BACKEND_DIR = ROOT / "backend"
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
-from app.database import SessionLocal, engine, Base
-from app.services.sync import sync_all
-from app.config import get_settings
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description="Sync content/ files into the database")
     parser.add_argument(
@@ -36,8 +31,14 @@ def main() -> int:
         import os
         os.environ["DATABASE_URL"] = args.database_url
 
+    # Import database state only after applying the CLI override; app.database
+    # creates its engine at module import time.
+    from app.config import get_settings
+    from app.database import Base, SessionLocal, engine
+    from app.services.sync import sync_all
+
     settings = get_settings()
-    print(f"Using database: {settings.database_url}", file=sys.stderr)
+    print("Using configured database connection", file=sys.stderr)
     print(f"Syncing content from: {args.content_dir}", file=sys.stderr)
 
     Base.metadata.create_all(bind=engine)

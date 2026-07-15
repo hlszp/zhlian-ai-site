@@ -1,7 +1,8 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import articles, categories, tags
+from app.auth import require_admin
 from app.config import get_settings
 from app.schemas import HealthOut
 
@@ -21,11 +22,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(articles.router, prefix=settings.api_prefix)
-app.include_router(categories.router, prefix=settings.api_prefix)
-app.include_router(tags.router, prefix=settings.api_prefix)
+admin_dependencies = [Depends(require_admin)]
+app.include_router(articles.router, prefix=settings.api_prefix, dependencies=admin_dependencies)
+app.include_router(categories.router, prefix=settings.api_prefix, dependencies=admin_dependencies)
+app.include_router(tags.router, prefix=settings.api_prefix, dependencies=admin_dependencies)
 
 
-@app.get("/health", response_model=HealthOut, tags=["health"])
+@app.get(f"{settings.api_prefix}/health", response_model=HealthOut, tags=["health"])
 async def health_check() -> HealthOut:
     return HealthOut(status="ok", environment=settings.environment)
